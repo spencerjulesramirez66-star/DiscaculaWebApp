@@ -8,6 +8,7 @@ urlpatterns = [
     path("accounts/", include("apps.accounts.urls")),
     path("teach/", include("apps.classrooms.urls_teacher")),
     path("play/", include("apps.classrooms.urls_student")),
+    path("play/", include("apps.games.urls")),
     path("", include("apps.core.urls")),
 ]
 

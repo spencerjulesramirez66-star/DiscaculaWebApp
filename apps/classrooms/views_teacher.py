@@ -188,7 +188,9 @@ def session_detail(request, pk):
 def session_live(request, pk):
     """HTMX partial polled every 5 s: status, time left, participants (MON-01 groundwork)."""
     session = _my_session(request, pk)
-    participants = session.participants.select_related("student").order_by("student__full_name")
+    participants = session.participants.select_related("student", "current_game").order_by(
+        "student__full_name"
+    )
     return render(
         request,
         "classrooms/partials/teacher_live.html",

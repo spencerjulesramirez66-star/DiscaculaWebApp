@@ -28,11 +28,12 @@
   {% if participants %}
     <div class="table-wrap">
       <table class="table">
-        <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Status" %}</th><th>{% translate "Joined" %}</th></tr></thead>
+        <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Game" %}</th><th>{% translate "Status" %}</th><th>{% translate "Joined" %}</th></tr></thead>
         <tbody>
           {% for p in participants %}
             <tr>
               <td>{{ p.student.full_name }}</td>
+              <td>{{ p.current_game.name|default:"—" }}</td>
               <td>{% if p.is_online and session.is_open %}<span class="badge badge--live">{% translate "Here" %}</span>{% else %}<span class="badge">{% translate "Away" %}</span>{% endif %}</td>
               <td>{{ p.created_at|time:"H:i" }}</td>
             </tr>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{{ round.game_type.name }}{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/games/game.css' %}">
+  <link rel="stylesheet" href="{% static 'css/games/'|add:round.game_type.key|add:'.css' %}">
+{% endblock %}
+{% block content %}
+<div class="game-shell">
+  {% if round.session_id %}
+    {# Same 5 s status poll as the session home: 5-minute warning / session ended banner. #}
+    <div hx-get="{% url 'play:session_status' round.session_id %}" hx-trigger="every 5s" hx-swap="innerHTML" aria-live="polite"></div>
+  {% endif %}
+  <div class="game-shell__bar">
+    <span class="muted">{{ round.game_type.name }} · {{ round.get_difficulty_display }}</span>
+    <span class="game-progress" data-game-progress aria-live="polite"></span>
+  </div>
+  {# The game module mounts here. Without JS the message below stays visible. #}
+  <div id="game-root" class="game-root" data-game="{{ round.game_type.key }}">
+    <noscript><p>{% translate "This game needs JavaScript turned on." %}</p></noscript>
+  </div>
+</div>
+{{ config|json_script:"game-config" }}
+{% endblock %}
+{% block extra_js %}
+  <script type="module" src="{% static 'js/games/runtime.js' %}"></script>
+{% endblock %}

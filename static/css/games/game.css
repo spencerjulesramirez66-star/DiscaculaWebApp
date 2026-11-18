@@ -1,0 +1,28 @@
+/* Shared game UI: level picker, game shell, result screen. Tokens only. */
+
+/* Level picker (radio cards) */
+.pick { border: none; padding: 0; margin: 0; }
+.pick legend { font-weight: 700; font-size: var(--font-size-lg); margin-bottom: var(--space-2); }
+.pick__options { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: var(--space-2); }
+.pick__option {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  min-height: calc(var(--tap-target) + 12px); padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border); border-radius: var(--radius-sm);
+  background: var(--color-surface); font-weight: 700; cursor: pointer; text-align: center;
+  transition: transform var(--duration), border-color var(--duration);
+}
+.pick__option:hover { transform: translateY(-1px); border-color: var(--color-primary); }
+.pick__option input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.pick__option:has(input:checked) { border-color: var(--color-primary); background: var(--color-primary); color: var(--color-primary-text); }
+.pick__option:has(input:focus-visible) { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+
+/* Game shell */
+.game-shell__bar { display: flex; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-3); }
+.game-progress { font-weight: 700; }
+.game-category + .game-category { margin-top: var(--space-4); }
+.game-category__hint { font-size: var(--font-size-base); font-weight: 400; }
+
+/* Result */
+.result__burst { font-size: 4rem; line-height: 1; color: var(--color-accent); margin: 0; animation: result-pop 600ms ease-out; }
+.result__score { font-size: var(--font-size-xxl); font-weight: 700; color: var(--color-primary); margin: 0; }
+@keyframes result-pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }

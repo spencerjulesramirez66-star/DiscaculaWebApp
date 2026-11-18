@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{{ game.name }}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/games/game.css' %}">{% endblock %}
+{% block content %}
+<p><a href="{% url 'play:session' session.pk %}">← {% translate "All games" %}</a></p>
+<div class="narrow card stack kid">
+  <h1>{{ game.name }}</h1>
+  <form method="post" class="stack">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+      <fieldset class="pick">
+        <legend>{{ field.label }}</legend>
+        <div class="pick__options">
+          {% for radio in field %}
+            <label class="pick__option">{{ radio.tag }}<span>{{ radio.choice_label }}</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    {% endfor %}
+    <button type="submit" class="btn btn--primary btn--lg btn--block">{% translate "Start game" %}</button>
+  </form>
+</div>
+{% endblock %}

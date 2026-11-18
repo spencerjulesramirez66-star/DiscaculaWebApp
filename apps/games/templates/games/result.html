@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{% translate "Well done!" %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/games/game.css' %}">{% endblock %}
+{% block content %}
+<div class="narrow card stack kid center result">
+  <p class="result__burst" aria-hidden="true">★</p>
+  <h1>{% translate "Congratulations!" %}</h1>
+  <p class="lead">{% blocktranslate with game=round.game_type.name %}You finished {{ game }}.{% endblocktranslate %}</p>
+  <p class="result__score">{{ round.score_percent }}%</p>
+  <p class="muted">{% translate "of the questions right on the first try" %}</p>
+  {% if session_open %}
+    <div class="stack">
+      <a class="btn btn--primary btn--lg btn--block" href="{% url 'games:start' round.session_id round.game_type.key %}">{% translate "Play again" %}</a>
+      <a class="btn btn--secondary btn--block" href="{% url 'play:session' round.session_id %}">{% translate "Choose another game" %}</a>
+    </div>
+  {% else %}
+    <p>{% translate "Your teacher's session has ended. Great job today!" %}</p>
+    <a class="btn btn--primary btn--block" href="{% url 'play:join' %}">{% translate "Finish" %}</a>
+  {% endif %}
+</div>
+{% endblock %}
