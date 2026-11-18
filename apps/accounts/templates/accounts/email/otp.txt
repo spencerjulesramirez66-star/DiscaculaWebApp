@@ -1,0 +1,10 @@
+{% autoescape off %}Hi {{ user.display_name }},
+
+Your {{ SITE_NAME }} {% if is_verify %}verification{% else %}password reset{% endif %} code is:
+
+    {{ code }}
+
+It expires in {{ minutes }} minutes. If you did not ask for this, you can ignore this email.
+
+{{ SITE_NAME }}
+{% endautoescape %}

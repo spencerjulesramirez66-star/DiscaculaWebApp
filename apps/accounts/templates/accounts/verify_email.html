@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Confirm your email" %}{% endblock %}
+{% block content %}
+<div class="narrow card stack">
+  <h1>{% translate "Confirm your email" %}</h1>
+  <p>{% blocktranslate with email=user.email %}We sent a 6-digit code to <strong>{{ email }}</strong>. It works for 10 minutes.{% endblocktranslate %}</p>
+  <form method="post" class="otp-input" novalidate>
+    {% csrf_token %}
+    {% translate "Confirm email" as submit_label %}
+    {% include "components/form.html" with form=form submit_label=submit_label %}
+  </form>
+  <form method="post" action="{% url 'accounts:resend_verification' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn--secondary btn--block" {% if resend_wait %}disabled title="{% blocktranslate %}Wait {{ resend_wait }} seconds{% endblocktranslate %}"{% endif %}>{% translate "Send a new code" %}</button>
+  </form>
+</div>
+{% endblock %}

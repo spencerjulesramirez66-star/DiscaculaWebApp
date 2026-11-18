@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{% translate "Home" %}{% endblock %}
+{% block content %}
+<section class="hero">
+  <img class="hero__logo" src="{% static 'assets/branding/logo.svg' %}" alt="" width="96" height="96">
+  <h1>{{ SITE_NAME }}</h1>
+  <p class="lead">{% translate "Short, friendly math games for learners with dyscalculia, guided by their teacher." %}</p>
+  <div class="choice-grid">
+    <a class="choice-card" href="{% url 'accounts:login' %}?as=student">
+      <span class="choice-card__title">{% translate "I'm a student" %}</span>
+      <span class="muted">{% translate "Log in and enter your room code to play." %}</span>
+    </a>
+    <a class="choice-card" href="{% url 'accounts:login' %}?as=teacher">
+      <span class="choice-card__title">{% translate "I'm a teacher" %}</span>
+      <span class="muted">{% translate "Manage classes, start sessions and follow progress." %}</span>
+    </a>
+  </div>
+  <p class="muted">{% translate "New here?" %} <a href="{% url 'accounts:signup' %}">{% translate "Create an account" %}</a></p>
+</section>
+{% endblock %}

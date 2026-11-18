@@ -1,0 +1,29 @@
+/* Accessibility modes — classes set on <body> from the student's profile (docs/06). */
+.a11y-contrast {
+  --color-bg: #000000;
+  --color-surface: #000000;
+  --color-text: #ffffff;
+  --color-text-muted: #ffffff;
+  --color-primary: #ffff00;
+  --color-primary-text: #000000;
+  --color-border: #ffffff;
+  --color-focus: #00ffff;
+  --shadow: none;
+}
+.a11y-large-text {
+  --font-size-base: 1.5rem;
+  --font-size-sm: 1.25rem;
+  --font-size-lg: 1.75rem;
+  --font-size-xl: 2.5rem;
+  --font-size-xxl: 3.25rem;
+  --tap-target: 64px;
+}
+.a11y-reduced-motion { --duration: 0ms; }
+.a11y-reduced-motion *, .a11y-reduced-motion *::before, .a11y-reduced-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --duration: 0ms; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

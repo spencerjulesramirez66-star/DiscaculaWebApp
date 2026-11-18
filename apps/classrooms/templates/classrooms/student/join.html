@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Enter room code" %}{% endblock %}
+{% block content %}
+<div class="narrow card stack kid">
+  <h1>{% blocktranslate with name=user.display_name %}Hi, {{ name }}!{% endblocktranslate %}</h1>
+  <p class="lead">{% translate "Type the room code from your teacher." %}</p>
+  <form method="post" class="code-input" novalidate>
+    {% csrf_token %}
+    {% translate "Join class" as submit_label %}
+    {% include "components/form.html" with form=form submit_label=submit_label %}
+  </form>
+</div>
+{% endblock %}

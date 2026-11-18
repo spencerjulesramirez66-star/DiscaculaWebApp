@@ -1,0 +1,18 @@
+{# Usage: {% include "components/form.html" with form=form submit_label="Save" %} #}
+{% load i18n %}
+{% if form.non_field_errors %}
+  <div class="form-errors" role="alert">{{ form.non_field_errors }}</div>
+{% endif %}
+{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+{% for field in form.visible_fields %}
+  <div class="field{% if field.errors %} field--error{% endif %}{% if field.widget_type == 'checkbox' %} field--checkbox{% endif %}">
+    {% if field.widget_type == 'checkbox' %}
+      {{ field }} {{ field.label_tag }}
+    {% else %}
+      {{ field.label_tag }} {{ field }}
+    {% endif %}
+    {% if field.help_text %}<small class="field__help" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</small>{% endif %}
+    {% for error in field.errors %}<small class="field__error">{{ error }}</small>{% endfor %}
+  </div>
+{% endfor %}
+<button type="submit" class="btn btn--primary btn--block">{{ submit_label|default:_("Submit") }}</button>

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ session.classroom.name }}{% endblock %}
+{% block content %}
+<div hx-get="{% url 'play:session_status' session.pk %}" hx-trigger="every 5s" hx-swap="innerHTML" aria-live="polite">
+  {% include "classrooms/partials/student_status.html" %}
+</div>
+<section class="stack kid">
+  <p class="muted">{{ session.classroom.name }}</p>
+  <h1>{% translate "Pick a game" %}</h1>
+  <div class="choice-grid">
+    {% for c in categories %}
+      <div class="choice-card choice-card--soon" aria-disabled="true">
+        <span class="choice-card__title">{{ c.name }}</span>
+        <span class="muted">{{ c.hint }}</span>
+        <span class="badge">{% translate "Coming soon" %}</span>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

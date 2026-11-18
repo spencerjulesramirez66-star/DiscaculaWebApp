@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "fruits": [
+    {"id": "apple", "label": "Apple", "src": "sprites/fruits/apple.svg"},
+    {"id": "banana", "label": "Banana", "src": "sprites/fruits/banana.svg"},
+    {"id": "orange", "label": "Orange", "src": "sprites/fruits/orange.svg"}
+  ],
+  "blender": {
+    "empty": "sprites/blender/blender-empty.svg",
+    "full": "sprites/blender/blender-full.svg"
+  },
+  "sounds": {}
+}

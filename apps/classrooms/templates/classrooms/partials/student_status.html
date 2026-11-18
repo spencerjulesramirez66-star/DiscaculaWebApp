@@ -1,0 +1,9 @@
+{% load i18n %}
+{% if not session.is_open %}
+  <div class="banner banner--success" role="status">
+    <strong>{% translate "Great job today!" %}</strong> {% translate "Your teacher's session has ended." %}
+    <a class="btn btn--primary" href="{% url 'play:join' %}">{% translate "Finish" %}</a>
+  </div>
+{% elif session.in_warning_window %}
+  <div class="banner banner--warning" role="status">{% translate "5 minutes left! Finish your game." %}</div>
+{% endif %}

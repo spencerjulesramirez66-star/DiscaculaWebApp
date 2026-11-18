@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Log in" %}{% endblock %}
+{% block content %}
+<div class="narrow card stack">
+  <h1>{% if as_role == "teacher" %}{% translate "Teacher log in" %}{% elif as_role == "student" %}{% translate "Student log in" %}{% else %}{% translate "Log in" %}{% endif %}</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% translate "Log in" as submit_label %}
+    {% include "components/form.html" with form=form submit_label=submit_label %}
+  </form>
+  <p class="muted"><a href="{% url 'accounts:forgot_password' %}">{% translate "Forgot your password?" %}</a></p>
+  <p class="muted">{% translate "No account yet?" %} <a href="{% url 'accounts:signup' %}">{% translate "Create one" %}</a></p>
+</div>
+{% endblock %}

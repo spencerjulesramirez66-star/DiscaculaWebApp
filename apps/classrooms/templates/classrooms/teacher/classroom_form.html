@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% if classroom %}{% translate "Edit class" %}{% else %}{% translate "New class" %}{% endif %}{% endblock %}
+{% block content %}
+<div class="narrow card stack">
+  <h1>{% if classroom %}{% translate "Edit class" %}{% else %}{% translate "New class" %}{% endif %}</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if classroom %}{% translate "Save class" as submit_label %}{% else %}{% translate "Create class" as submit_label %}{% endif %}
+    {% include "components/form.html" with form=form submit_label=submit_label %}
+  </form>
+  {% if classroom %}
+    <form method="post" action="{% url 'teach:classroom_archive' classroom.pk %}" data-confirm="{% translate 'Archive this class? Its session will end.' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn--danger btn--block">{% translate "Archive class" %}</button>
+    </form>
+  {% endif %}
+  <a href="{% if classroom %}{% url 'teach:classroom_detail' classroom.pk %}{% else %}{% url 'teach:dashboard' %}{% endif %}">{% translate "Cancel" %}</a>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "My classes" %}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{% translate "My classes" %}</h1>
+  <a class="btn btn--primary" href="{% url 'teach:classroom_create' %}">{% translate "Create a class" %}</a>
+</div>
+{% if classrooms %}
+  <div class="card-grid">
+    {% for c in classrooms %}
+      <a class="card card--link" href="{% url 'teach:classroom_detail' c.pk %}">
+        <h2 class="card__title">{{ c.name }}</h2>
+        {% if c.description %}<p class="muted">{{ c.description }}</p>{% endif %}
+        <p class="card__meta">
+          {% blocktranslate count n=c.student_count %}{{ n }} student{% plural %}{{ n }} students{% endblocktranslate %}
+          {% if c.open_sessions %}<span class="badge badge--live">{% translate "Session live" %}</span>{% endif %}
+        </p>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card empty stack">
+    <h2>{% translate "No classes yet" %}</h2>
+    <p class="muted">{% translate "Create a class, add students, then start a session to get a room code." %}</p>
+    <a class="btn btn--primary" href="{% url 'teach:classroom_create' %}">{% translate "Create your first class" %}</a>
+  </div>
+{% endif %}
+{% endblock %}

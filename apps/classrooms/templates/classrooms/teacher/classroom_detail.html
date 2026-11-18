@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ classroom.name }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'teach:dashboard' %}">← {% translate "My classes" %}</a></p>
+<div class="page-head">
+  <div>
+    <h1>{{ classroom.name }}</h1>
+    {% if classroom.description %}<p class="muted">{{ classroom.description }}</p>{% endif %}
+  </div>
+  <div class="actions">
+    <a class="btn btn--secondary" href="{% url 'teach:classroom_edit' classroom.pk %}">{% translate "Edit class" %}</a>
+    {% if open_session %}
+      <a class="btn btn--primary" href="{% url 'teach:session_detail' open_session.pk %}">{% translate "Open live session" %}</a>
+    {% else %}
+      <form method="post" action="{% url 'teach:session_start' classroom.pk %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--primary">{% translate "Start a session" %}</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="split">
+  <section class="card stack" aria-labelledby="students-h">
+    <h2 id="students-h">{% blocktranslate count n=active|length %}{{ n }} student{% plural %}{{ n }} students{% endblocktranslate %}</h2>
+    {% if active %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Username" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
+          <tbody>
+            {% for e in active %}
+              <tr>
+                <td>{{ e.student.full_name }}</td>
+                <td><code>{{ e.student.username }}</code></td>
+                <td class="table__actions">
+                  <form method="post" action="{% url 'teach:student_reset_password' classroom.pk e.student.pk %}" class="inline" data-confirm="{% translate 'Give this student a new password?' %}">
+                    {% csrf_token %}<button type="submit" class="btn btn--small btn--secondary">{% translate "Reset password" %}</button>
+                  </form>
+                  <form method="post" action="{% url 'teach:student_remove' classroom.pk e.student.pk %}" class="inline" data-confirm="{% translate 'Remove this student from the class?' %}">
+                    {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Remove" %}</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">{% translate "No students yet. Add them here, or start a session and let students join with the room code." %}</p>
+    {% endif %}
+    {% if removed %}
+      <details>
+        <summary>{% blocktranslate count n=removed|length %}{{ n }} removed student{% plural %}{{ n }} removed students{% endblocktranslate %}</summary>
+        <ul class="plain-list">
+          {% for e in removed %}
+            <li>{{ e.student.full_name }} <code>{{ e.student.username }}</code>
+              <form method="post" action="{% url 'teach:student_restore' classroom.pk e.student.pk %}" class="inline">
+                {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Add back" %}</button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      </details>
+    {% endif %}
+  </section>
+
+  <section class="card stack" aria-labelledby="add-h">
+    <h2 id="add-h">{% translate "Add students" %}</h2>
+    <form method="post" action="{% url 'teach:students_add' classroom.pk %}" novalidate>
+      {% csrf_token %}
+      {% translate "Create accounts" as submit_label %}
+      {% include "components/form.html" with form=add_form submit_label=submit_label %}
+    </form>
+    <p class="muted">{% translate "Students who already have an account can join with the room code instead." %}</p>
+  </section>
+</div>
+{% endblock %}
