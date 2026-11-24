@@ -1,0 +1,13 @@
+{% load static %}
+{# Loading splash (GEN-01). Shown only when splash.js adds .show-splash to <html>. Art: static/assets/branding + fruit sprites. #}
+<div class="splash" aria-hidden="true">
+  <div class="splash__inner">
+    <img class="splash__logo" src="{% static 'assets/branding/logo.svg' %}" alt="" width="120" height="120">
+    <div class="splash__fruits">
+      <img src="{% static 'assets/games/fruit_blender/sprites/fruits/apple.svg' %}" alt="" width="44" height="44">
+      <img src="{% static 'assets/games/fruit_blender/sprites/fruits/banana.svg' %}" alt="" width="44" height="44">
+      <img src="{% static 'assets/games/fruit_blender/sprites/fruits/orange.svg' %}" alt="" width="44" height="44">
+    </div>
+    <p class="splash__name">{{ SITE_NAME }}</p>
+  </div>
+</div>

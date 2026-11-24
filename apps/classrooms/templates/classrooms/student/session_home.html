@@ -8,14 +8,29 @@
 <section class="stack kid">
   <p class="muted">{{ session.classroom.name }}</p>
   <h1>{% translate "Pick a game" %}</h1>
-  <div class="choice-grid">
-    {% for c in categories %}
-      <div class="choice-card choice-card--soon" aria-disabled="true">
-        <span class="choice-card__title">{{ c.name }}</span>
-        <span class="muted">{{ c.hint }}</span>
-        <span class="badge">{% translate "Coming soon" %}</span>
+  {% for c in categories %}
+    <section class="game-category" aria-labelledby="cat-{{ c.key }}">
+      <h2 id="cat-{{ c.key }}">{{ c.name }} <span class="muted game-category__hint">· {{ c.hint }}</span></h2>
+      <div class="choice-grid">
+        {% for g in c.games %}
+          {% if g.is_playable %}
+            <a class="choice-card" href="{% url 'games:start' session.pk g.key %}">
+              <span class="choice-card__title">{{ g.name }}</span>
+              <span class="muted">{{ g.description }}</span>
+            </a>
+          {% else %}
+            <div class="choice-card choice-card--soon" aria-disabled="true">
+              <span class="choice-card__title">{{ g.name }}</span>
+              <span class="badge">{% translate "Coming soon" %}</span>
+            </div>
+          {% endif %}
+        {% empty %}
+          <div class="choice-card choice-card--soon" aria-disabled="true">
+            <span class="badge">{% translate "Coming soon" %}</span>
+          </div>
+        {% endfor %}
       </div>
-    {% endfor %}
-  </div>
+    </section>
+  {% endfor %}
 </section>
 {% endblock %}

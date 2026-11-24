@@ -5,7 +5,7 @@
 <div class="narrow card stack">
   <h1>{% translate "Student sign up" %}</h1>
   <p class="muted">{% translate "You only do this once. After that you stay logged in on this device." %}</p>
-  <form method="post" novalidate>
+  <form method="post" data-autosave="signup-student" novalidate>
     {% csrf_token %}
     {% translate "Create my account" as submit_label %}
     {% include "components/form.html" with form=form submit_label=submit_label %}

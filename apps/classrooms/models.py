@@ -108,6 +108,9 @@ class SessionParticipant(TimeStampedModel):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="participations"
     )
     last_seen_at = models.DateTimeField(default=timezone.now)
+    current_game = models.ForeignKey(
+        "games.GameType", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
 
     class Meta:
         ordering = ["created_at"]

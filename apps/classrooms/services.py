@@ -143,7 +143,7 @@ def extend_session(session: ClassSession, minutes: int) -> ClassSession:
         raise ValueError(f"Extend by one of {EXTEND_CHOICES_MINUTES} minutes.")
     refresh(session)
     if not session.is_open:
-        raise ValueError("Session already ended.")
+        raise ValueError("Class time has already ended.")
     session.expires_at += timedelta(minutes=minutes)
     session.extended_count += 1
     session.save(update_fields=["expires_at", "extended_count", "updated_at"])

@@ -6,11 +6,18 @@ from apps.core.assets import ManifestNotFound, asset_url, avatar_manifest, load_
 
 
 @pytest.mark.django_db
-def test_home_renders_site_name_from_settings(client):
+def test_bare_address_goes_to_home_page(client):
+    response = client.get("/")
+    assert response.status_code == 302 and response.url == "/home/"
     with override_settings(SITE_NAME="Renamed App"):
-        response = client.get(reverse("core:home"))
+        response = client.get("/home/")
     assert response.status_code == 200
     assert "Renamed App" in response.content.decode()
+
+
+@pytest.mark.django_db
+def test_home_sends_logged_in_users_to_their_page(teacher_client):
+    assert teacher_client.get("/home/").url == reverse("accounts:after_login")
 
 
 def test_fruit_blender_manifest_loads():

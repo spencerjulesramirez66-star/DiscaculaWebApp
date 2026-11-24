@@ -1,20 +1,37 @@
 """Student-side views: enter room code, session home, status polling (namespace "play")."""
 
+from urllib.parse import urlencode
+
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from apps.accounts.decorators import student_required
+from apps.games.models import Category, GameType
 
 from . import services
 from .forms import JoinForm
 from .models import SessionParticipant
 from .views_teacher import HTMX_STOP_POLLING
 
-# Game categories shown on the session home. Real games arrive in build step 4.
-CATEGORIES = [
-    {"key": "visual", "name": "Visual", "hint": "See and move things"},
-    {"key": "kinesthetic", "name": "Kinesthetic", "hint": "Move and act"},
-    {"key": "auditory", "name": "Auditory", "hint": "Listen and answer"},
-]
+CATEGORY_HINTS = {
+    Category.VISUAL: "See and move things",
+    Category.KINESTHETIC: "Move and act",
+    Category.AUDITORY: "Listen and answer",
+}
+
+
+def _game_menu() -> list[dict]:
+    """Game cards grouped by category (GAM-01). Non-playable games show as 'Coming soon'."""
+    games = list(GameType.objects.all())
+    return [
+        {
+            "key": value,
+            "name": label,
+            "hint": CATEGORY_HINTS.get(value, ""),
+            "games": [g for g in games if g.category == value],
+        }
+        for value, label in Category.choices
+    ]
 
 
 @student_required
@@ -28,7 +45,12 @@ def join(request):
         except services.JoinError as exc:
             form.add_error("code", str(exc))
         else:
-            return redirect("play:session", pk=session.pk)
+            session_url = reverse("play:session", args=[session.pk])
+            profile = getattr(request.user, "student_profile", None)
+            if profile is None or not profile.has_avatar:
+                # First time ever: make a character before playing (docs/05-flows.md).
+                return redirect(f"{reverse('accounts:avatar')}?{urlencode({'next': session_url})}")
+            return redirect(session_url)
     return render(request, "classrooms/student/join.html", {"form": form})
 
 
@@ -52,7 +74,7 @@ def session_home(request, pk):
     return render(
         request,
         "classrooms/student/session_home.html",
-        {"session": session, "categories": CATEGORIES},
+        {"session": session, "categories": _game_menu()},
     )
 
 

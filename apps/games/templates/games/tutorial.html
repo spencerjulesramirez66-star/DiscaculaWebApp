@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% block title %}{% blocktranslate with game=game.name %}How to play {{ game }}{% endblocktranslate %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/games/game.css' %}">{% endblock %}
+{% block content %}
+<p><a href="{% url 'play:session' session.pk %}">← {% translate "All games" %}</a></p>
+<div class="tutorial card stack kid">
+  <h1>{% blocktranslate with game=game.name %}How to play {{ game }}{% endblocktranslate %}</h1>
+
+  {% if video %}
+    {# First time the Done button unlocks when the video ends (tutorial.js). Captions on when the profile asks. #}
+    <video class="tutorial__video" controls playsinline preload="metadata" data-tutorial-video
+           {% if a11y.reduced_motion %}{% else %}autoplay muted{% endif %}>
+      <source src="{{ video.url }}" type="{{ video.mime_type }}">
+      {% if video.captions_url %}
+        <track kind="captions" src="{{ video.captions_url }}" srclang="en" label="English" {% if a11y.captions %}default{% endif %}>
+      {% endif %}
+    </video>
+  {% else %}
+    {# No video file yet → written steps, so the game is never blocked. #}
+    <ol class="tutorial__steps">
+      <li>{% translate "Look at the numbers at the top." %}</li>
+      <li>{% translate "Drag fruits into the blender (or tap them)." %}</li>
+      <li>{% translate "For taking away, drag fruits out of the blender." %}</li>
+      <li>{% translate "Press Blend!" %}</li>
+      <li>{% translate "Count the fruits and pick the right number." %}</li>
+    </ol>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn--primary btn--lg btn--block" data-tutorial-done
+            {% if video and first_time %}disabled{% endif %}>{% translate "I'm ready to play!" %}</button>
+    {% if video and first_time %}
+      <p class="muted center" data-tutorial-hint>{% translate "Watch the video to the end first." %}</p>
+    {% endif %}
+  </form>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'js/core/tutorial.js' %}" defer></script>{% endblock %}

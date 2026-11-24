@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Upload a video" %}{% endblock %}
+{% block content %}
+<p><a href="{% url 'library:home' %}">← {% translate "My materials" %}</a></p>
+<div class="card stack narrow">
+  <h1>{% translate "Upload a how-to video" %}</h1>
+  <form method="post" enctype="multipart/form-data" data-autosave="video-upload" novalidate>
+    {% csrf_token %}
+    {% translate "Upload video" as submit_label %}
+    {% include "components/form.html" with form=form submit_label=submit_label %}
+  </form>
+</div>
+{% endblock %}

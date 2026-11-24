@@ -12,6 +12,11 @@ urlpatterns = [
     path("classes/<int:pk>/archive/", v.classroom_archive, name="classroom_archive"),
     path("classes/<int:pk>/students/add/", v.students_add, name="students_add"),
     path(
+        "classes/<int:pk>/students/<int:student_pk>/",
+        v.student_detail,
+        name="student_detail",
+    ),
+    path(
         "classes/<int:pk>/students/<int:student_pk>/remove/",
         v.student_remove,
         name="student_remove",

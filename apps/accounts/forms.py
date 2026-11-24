@@ -3,7 +3,7 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import gettext_lazy as _
 
-from .models import Role, User, username_validator
+from .models import Role, StudentProfile, User, username_validator
 
 
 class LoginForm(AuthenticationForm):
@@ -80,7 +80,7 @@ class StudentSignupForm(_PasswordPairMixin):
         label=_("Username"),
         max_length=150,
         validators=[username_validator],
-        help_text=_("What you'll type to log in. Letters, numbers, dots and dashes."),
+        help_text=_("The name you type to log in, like maria2. No spaces."),
         widget=forms.TextInput(attrs={"autocomplete": "username", "autocapitalize": "none"}),
     )
     email = forms.EmailField(
@@ -116,3 +116,34 @@ class ForgotPasswordForm(forms.Form):
 
 class ResetPasswordForm(_PasswordPairMixin, OTPForm):
     field_order = ["code", "password1", "password2"]
+
+
+class AccessibilityForm(forms.ModelForm):
+    """A11Y-01: set by the teacher on the student's history page (docs/06-accessibility.md)."""
+
+    class Meta:
+        model = StudentProfile
+        fields = [
+            "high_contrast",
+            "large_text",
+            "reduced_motion",
+            "captions",
+            "narration",
+            "keyboard_mode",
+        ]
+        labels = {
+            "high_contrast": _("High contrast"),
+            "large_text": _("Large text and buttons"),
+            "reduced_motion": _("Reduce motion"),
+            "captions": _("Subtitles on videos"),
+            "narration": _("Read questions out loud"),
+            "keyboard_mode": _("Keyboard help"),
+        }
+        help_texts = {
+            "high_contrast": _("White and yellow on black. Easier to see."),
+            "large_text": _("Bigger letters, numbers and tap targets."),
+            "reduced_motion": _("Stops moving pictures and animations."),
+            "captions": _("Shows words on the how-to video. Helps students who can't hear well."),
+            "narration": _("The computer reads each question out loud."),
+            "keyboard_mode": _("Shows tips for playing with the keyboard instead of a mouse."),
+        }

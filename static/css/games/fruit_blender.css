@@ -1,0 +1,48 @@
+/* Fruit Blender. Loaded only on its play page (play.html picks <game key>.css). */
+.fb { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.fb__question { text-align: center; }
+.fb__sum { font-size: clamp(2.5rem, 9vw, 4rem); font-weight: 700; margin: 0; letter-spacing: 0.05em; }
+.fb__prompt { font-size: var(--font-size-lg); margin: 0; }
+
+.fb__stage { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); align-items: stretch; }
+.fb__zone {
+  position: relative; min-height: 16rem; padding: var(--space-3);
+  background: var(--color-surface); border: 3px dashed var(--color-border); border-radius: var(--radius);
+  transition: border-color var(--duration), background-color var(--duration);
+}
+.fb__zone.is-over { border-color: var(--color-primary); border-style: solid; }
+.fb__tray::before { content: "Basket"; position: absolute; top: var(--space-2); left: var(--space-3); font-weight: 700; color: var(--color-text-muted); }
+.fb__blender { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; }
+.fb__blender-img { position: absolute; inset: var(--space-3); width: calc(100% - 2 * var(--space-3)); height: calc(100% - 2 * var(--space-3)); object-fit: contain; opacity: 0.35; pointer-events: none; }
+.fb__items { position: relative; display: flex; flex-wrap: wrap; gap: var(--space-2); justify-content: center; align-content: flex-start; padding-top: var(--space-4); width: 100%; }
+
+.fb__fruit {
+  width: 64px; height: 64px; padding: 4px; border: 2px solid transparent; border-radius: 50%;
+  background: transparent; cursor: grab; touch-action: none; user-select: none;
+  transition: transform var(--duration);
+}
+.fb__fruit img { width: 100%; height: 100%; pointer-events: none; }
+.fb__fruit:hover:not(:disabled) { transform: translateY(-2px) scale(1.05); }
+.fb__fruit:disabled { cursor: default; }
+.fb__fruit.is-dragging { opacity: 0.3; }
+.fb__ghost { position: fixed; z-index: 100; pointer-events: none; transform: translate(-50%, -50%) scale(1.15); }
+.a11y-large-text .fb__fruit { width: 80px; height: 80px; }
+
+.fb__blender.is-blending { animation: fb-shake 150ms linear infinite; }
+.fb__blender.is-blended .fb__blender-img { opacity: 0.6; }
+.fb__blender.is-cheer { border-color: var(--color-success); border-style: solid; }
+@keyframes fb-shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px) rotate(-1deg); } 75% { transform: translateX(4px) rotate(1deg); } }
+
+.fb__actions { display: flex; justify-content: center; gap: var(--space-3); flex-wrap: wrap; }
+.fb__choices { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: center; }
+.fb__choice { min-width: 6rem; font-size: var(--font-size-xl); }
+.fb__choice.is-wrong { border-color: var(--color-danger); color: var(--color-danger); text-decoration: line-through; }
+.fb__choice.is-right { border-color: var(--color-success); background: var(--color-success); color: var(--color-on-success); }
+.fb__feedback { text-align: center; font-size: var(--font-size-lg); font-weight: 700; min-height: 1.6em; margin: 0; }
+
+@media (max-width: 40rem) {
+  .fb__stage { grid-template-columns: 1fr; }
+  .fb__zone { min-height: 11rem; }
+  .fb__fruit { width: 52px; height: 52px; }
+}

@@ -176,10 +176,21 @@ def test_teachers_cannot_open_student_pages(teacher_client):
 
 def test_student_join_view_then_shortcut_back_to_session(student_client, classroom):
     session = services.start_session(classroom)
+    session_url = reverse("play:session", args=[session.pk])
+    response = student_client.post(reverse("play:join"), {"code": session.code})
+    # First time ever → make a character first, then on to the session.
+    assert response.url.startswith(reverse("accounts:avatar"))
+    assert "next=" in response.url
+    # Next visit to the code screen goes straight back into the open session.
+    assert student_client.get(reverse("play:join")).url == session_url
+
+
+def test_join_with_avatar_goes_straight_to_session(student_client, student, classroom):
+    student.student_profile.avatar = {"pack": "default", "base": "cat"}
+    student.student_profile.save()
+    session = services.start_session(classroom)
     response = student_client.post(reverse("play:join"), {"code": session.code})
     assert response.url == reverse("play:session", args=[session.pk])
-    # Next visit to the code screen goes straight back into the open session.
-    assert student_client.get(reverse("play:join")).url == response.url
 
 
 def test_live_partial_stops_polling_when_ended(teacher_client, classroom):

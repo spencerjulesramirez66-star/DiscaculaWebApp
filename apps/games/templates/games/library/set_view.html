@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ qset.title }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'library:home' %}">← {% translate "My materials" %}</a></p>
+<div class="card stack narrow">
+  <h1>{{ qset.title }}</h1>
+  <p class="muted">{{ qset.game_type.name }} · {{ qset.get_difficulty_display }} · {{ qset.get_operation_display }}</p>
+  <ol class="question-list">
+    {% for q in qset.questions.all %}<li>{{ q.operand_a }} {% if q.operator == "+" %}+{% else %}−{% endif %} {{ q.operand_b }} = {{ q.answer }}</li>{% endfor %}
+  </ol>
+  <form method="post" action="{% url 'library:set_copy' qset.pk %}">
+    {% csrf_token %}<button type="submit" class="btn btn--primary btn--block">{% translate "Make my own copy" %}</button>
+  </form>
+</div>
+{% endblock %}

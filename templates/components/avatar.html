@@ -1,0 +1,1 @@
+{% if parts %}<span class="avatar avatar--{{ size }}" style="color: {{ parts.color }}" role="img" aria-label="{{ user.display_name }}">{% for layer in parts.layers %}<span class="avatar__layer">{{ layer }}</span>{% endfor %}</span>{% else %}<span class="avatar avatar--{{ size }} avatar--empty" aria-hidden="true">{{ user.display_name|slice:":1"|upper }}</span>{% endif %}

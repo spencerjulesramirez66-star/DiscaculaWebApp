@@ -4,23 +4,86 @@
   "name": "Default Pack",
   "canvas": 512,
   "layers": [
-    {"key": "base", "z": 0, "required": true, "options": [
-      {"id": "cat", "label": "Cat", "src": "base/cat.svg"},
-      {"id": "bear", "label": "Bear", "src": "base/bear.svg"}
-    ]},
-    {"key": "color", "z": 0, "type": "color", "required": true, "options": [
-      {"id": "orange", "label": "Orange", "value": "#ffb74d"},
-      {"id": "blue", "label": "Blue", "value": "#64b5f6"},
-      {"id": "green", "label": "Green", "value": "#81c784"}
-    ]},
-    {"key": "hair", "z": 1, "required": false, "options": [
-      {"id": "tuft", "label": "Tuft", "src": "hair/tuft.svg"}
-    ]},
-    {"key": "hat", "z": 2, "required": false, "options": [
-      {"id": "crown", "label": "Crown", "src": "hat/crown.svg"}
-    ]},
-    {"key": "accessory", "z": 3, "required": false, "options": [
-      {"id": "glasses", "label": "Glasses", "src": "accessory/glasses.svg"}
-    ]}
+    {
+      "key": "base",
+      "z": 0,
+      "required": true,
+      "options": [
+        {
+          "id": "cat",
+          "label": "Cat",
+          "src": "base/cat.svg"
+        },
+        {
+          "id": "bear",
+          "label": "Bear",
+          "src": "base/bear.svg"
+        }
+      ],
+      "label": "Character"
+    },
+    {
+      "key": "color",
+      "z": 0,
+      "type": "color",
+      "required": true,
+      "options": [
+        {
+          "id": "orange",
+          "label": "Orange",
+          "value": "#ffb74d"
+        },
+        {
+          "id": "blue",
+          "label": "Blue",
+          "value": "#64b5f6"
+        },
+        {
+          "id": "green",
+          "label": "Green",
+          "value": "#81c784"
+        }
+      ],
+      "label": "Colour"
+    },
+    {
+      "key": "hair",
+      "z": 1,
+      "required": false,
+      "options": [
+        {
+          "id": "tuft",
+          "label": "Tuft",
+          "src": "hair/tuft.svg"
+        }
+      ],
+      "label": "Hair"
+    },
+    {
+      "key": "hat",
+      "z": 2,
+      "required": false,
+      "options": [
+        {
+          "id": "crown",
+          "label": "Crown",
+          "src": "hat/crown.svg"
+        }
+      ],
+      "label": "Hat"
+    },
+    {
+      "key": "accessory",
+      "z": 3,
+      "required": false,
+      "options": [
+        {
+          "id": "glasses",
+          "label": "Glasses",
+          "src": "accessory/glasses.svg"
+        }
+      ],
+      "label": "Extra"
+    }
   ]
 }
