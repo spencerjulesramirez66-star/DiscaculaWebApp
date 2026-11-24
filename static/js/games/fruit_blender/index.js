@@ -1,12 +1,17 @@
 // Visual → Fruit Blender (GAM-02). DOM + SVG + Pointer Events (ADR-0003).
 //
-// Addition a + b:  put a fruits in, then b more, Blend, pick the total.
-// Subtraction a − b: blender starts with a fruits, take b out, Blend, pick what's left.
+// Count the parts, then the whole (a common way to teach early addition/subtraction):
+//   Adding  3 + 2:  put 3 apples in → "How many apples?" → add 2 bananas → "How many bananas?"
+//                   → Blend! → "How many fruits altogether?"   (only this last answer is scored)
+//   Taking away 5 − 2: "How many apples are in the blender?" → take 2 out → "How many did you
+//                   take out?" → Blend! → "How many are left?"  (scored)
+// Counting steps are practice: hints and retries, nothing is sent to the server.
 //
 // Every fruit is a real <button>: drag it, tap it, or press Enter/Space to move it.
 // That makes it work with mouse, touch, keyboard and screen readers.
 
 const DRAG_THRESHOLD = 6; // px a pointer must move before a press counts as a drag
+const MOVE_PHASES = new Set(["addA", "addB", "takeOut"]);
 
 export function mount(root, config, game) {
   const fruits = Object.fromEntries(config.assets.fruits.map((f) => [f.id, f]));
@@ -47,13 +52,12 @@ export function mount(root, config, game) {
   // ---- per-question state -------------------------------------------------
   let q, items, phase, startedAt, nextId;
 
-  function plural(label, n) {
-    return n === 1 ? label.toLowerCase() : `${label.toLowerCase()}s`;
-  }
-
-  function makeItems(kind, count, where, locked = false) {
-    return Array.from({ length: count }, () => ({ id: nextId++, kind, where, locked }));
-  }
+  const label = (kind) => fruits[kind].label.toLowerCase();
+  const plural = (kind, n) => (n === 1 ? label(kind) : `${label(kind)}s`);
+  const makeItems = (kind, count, where) =>
+    Array.from({ length: count }, () => ({ id: nextId++, kind, where, locked: false }));
+  const countIn = (where, kind) =>
+    items.filter((i) => i.where === where && (!kind || i.kind === kind)).length;
 
   function startQuestion() {
     q = questions[index];
@@ -61,7 +65,7 @@ export function mount(root, config, game) {
     startedAt = performance.now();
     el.feedback.textContent = "";
     el.blenderImg.src = config.assets.blender.empty;
-    el.blenderZone.classList.remove("is-blending", "is-blended");
+    el.blenderZone.classList.remove("is-blending", "is-blended", "is-cheer");
     game.progress(index + 1, questions.length);
     el.sum.textContent = `${q.a} ${q.op === "+" ? "+" : "−"} ${q.b}`;
 
@@ -69,28 +73,30 @@ export function mount(root, config, game) {
       phase = "addA";
       items = makeItems(q.fruitA, q.a + 2, "tray");
     } else {
-      phase = "takeOut";
-      items = [...makeItems(q.fruitA, q.a, "blender"), ...makeItems(q.fruitA, 0, "tray")];
+      phase = "countStart";
+      items = makeItems(q.fruitA, q.a, "blender");
     }
     render();
     game.speak(`${el.sum.textContent}. ${el.prompt.textContent}`);
   }
 
-  function inBlender(kind, includeLocked = true) {
-    return items.filter((i) => i.where === "blender" && i.kind === kind && (includeLocked || !i.locked)).length;
-  }
-
-  function promptText() {
-    const A = fruits[q.fruitA].label;
-    const B = fruits[q.fruitB].label;
+  // What the child is asked at each step. Counting steps also name the right answer.
+  function step() {
+    const A = q.fruitA;
+    const B = q.fruitB;
     switch (phase) {
-      case "addA": return `Put ${q.a} ${plural(A, q.a)} in the blender.`;
-      case "addB": return `Now add ${q.b} ${plural(B, q.b)}.`;
-      case "takeOut": return `Take ${q.b} ${plural(A, q.b)} out of the blender.`;
-      case "answer": return q.op === "+"
-        ? "How many fruits are in the blender?"
-        : "How many fruits are left in the blender?";
-      default: return "";
+      case "addA": return { prompt: `Put ${q.a} ${plural(A, q.a)} in the blender.` };
+      case "countA": return { prompt: `How many ${plural(A, 2)} are in the blender?`, count: q.a, then: "addB" };
+      case "addB": return { prompt: `Now add ${q.b} ${plural(B, q.b)}.` };
+      case "countB": return { prompt: `How many ${plural(B, 2)} did you add?`, count: q.b, then: "ready" };
+      case "countStart": return { prompt: `How many ${plural(A, 2)} are in the blender?`, count: q.a, then: "takeOut" };
+      case "takeOut": return { prompt: `Take ${q.b} ${plural(A, q.b)} out of the blender.` };
+      case "countOut": return { prompt: `How many ${plural(A, 2)} did you take out?`, count: q.b, then: "ready" };
+      case "ready": return { prompt: "Great counting! Now press Blend!" };
+      case "answer": return {
+        prompt: q.op === "+" ? "How many fruits are in the blender altogether?" : "How many fruits are left in the blender?",
+      };
+      default: return { prompt: "" };
     }
   }
 
@@ -101,59 +107,91 @@ export function mount(root, config, game) {
     btn.type = "button";
     btn.className = "fb__fruit";
     btn.dataset.id = item.id;
-    btn.disabled = item.locked || phase === "answer" || phase === "done";
+    btn.disabled = item.locked || !MOVE_PHASES.has(phase);
     const action = item.where === "tray" ? "put in the blender" : "take out";
-    btn.setAttribute("aria-label", `${f.label}, ${action}`);
+    btn.setAttribute("aria-label", btn.disabled ? f.label : `${f.label}, ${action}`);
     btn.innerHTML = `<img src="${f.src}" alt="" draggable="false">`;
     return btn;
   }
 
   function render() {
-    el.prompt.textContent = promptText();
+    el.prompt.textContent = step().prompt;
     el.tray.replaceChildren(...items.filter((i) => i.where === "tray").map(fruitButton));
     el.blender.replaceChildren(...items.filter((i) => i.where === "blender").map(fruitButton));
     el.trayZone.hidden = phase === "answer" || phase === "done";
     renderActions();
   }
 
-  function actionButton(label, onClick, primary = true) {
+  function actionButton(text, onClick, primary = true) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = `btn btn--lg ${primary ? "btn--primary" : "btn--secondary"}`;
-    btn.textContent = label;
+    btn.textContent = text;
     btn.addEventListener("click", onClick);
     return btn;
   }
 
+  function choiceGroup(numbers, onPick, label) {
+    const group = document.createElement("div");
+    group.className = "fb__choices";
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", label);
+    for (const n of numbers) {
+      const btn = actionButton(String(n), () => onPick(n, btn), false);
+      btn.classList.add("fb__choice");
+      group.append(btn);
+    }
+    return group;
+  }
+
+  // The right number plus two neighbours (never below zero), shuffled.
+  function countChoices(n) {
+    const set = new Set([n, n + 1]);
+    set.add(n - 1 >= 0 ? n - 1 : n + 2);
+    const list = [...set];
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    return list;
+  }
+
   function renderActions() {
     el.actions.replaceChildren();
-    if (phase === "addA") el.actions.append(actionButton("Next fruit", checkAddA));
-    if (phase === "addB") el.actions.append(actionButton("Blend!", checkAddB));
-    if (phase === "takeOut") el.actions.append(actionButton("Blend!", checkTakeOut));
-    if (phase === "answer") {
-      const group = document.createElement("div");
-      group.className = "fb__choices";
-      group.setAttribute("role", "group");
-      group.setAttribute("aria-label", "Answers");
-      for (const choice of q.choices) {
-        const btn = actionButton(String(choice), () => answer(choice, btn), false);
-        btn.classList.add("fb__choice");
-        group.append(btn);
-      }
+    const s = step();
+    if (MOVE_PHASES.has(phase)) {
+      el.actions.append(actionButton("Done", checkMove));
+    } else if (s.count !== undefined) {
+      const group = choiceGroup(countChoices(s.count), countPick, "How many?");
+      el.actions.append(group);
+      group.querySelector("button")?.focus();
+    } else if (phase === "ready") {
+      const btn = actionButton("Blend!", blend);
+      el.actions.append(btn);
+      btn.focus();
+    } else if (phase === "answer") {
+      const group = choiceGroup(q.choices, answer, "Answers");
       el.actions.append(group);
       group.querySelector("button")?.focus();
     }
   }
 
+  function goTo(next) {
+    phase = next;
+    if (phase === "addB") {
+      items.forEach((i) => { i.locked = true; });          // the apples stay in
+      items = items.filter((i) => i.where === "blender");
+      items.push(...makeItems(q.fruitB, q.b + 2, "tray"));
+    }
+    render();
+    game.speak(el.prompt.textContent);
+  }
+
   // ---- moving fruit -------------------------------------------------------
   function move(id) {
     const item = items.find((i) => i.id === Number(id));
-    if (!item || item.locked) return;
-    if (phase === "takeOut") {
-      item.where = item.where === "blender" ? "tray" : "blender";
-    } else if (phase === "addA" || phase === "addB") {
-      item.where = item.where === "tray" ? "blender" : "tray";
-    }
+    if (!item || item.locked || !MOVE_PHASES.has(phase)) return;
+    item.where = item.where === "tray" ? "blender" : "tray";
     el.feedback.textContent = "";
     render();
   }
@@ -195,8 +233,7 @@ export function mount(root, config, game) {
 
   function endDrag(event) {
     if (!drag) return;
-    const wasDrag = Boolean(drag.ghost);
-    if (wasDrag) {
+    if (drag.ghost) {
       const over = zoneAt(event.clientX, event.clientY);
       const item = items.find((i) => i.id === Number(drag.id));
       drag.ghost.remove();
@@ -223,32 +260,38 @@ export function mount(root, config, game) {
   }
 
   // ---- checks -------------------------------------------------------------
-  function tryAgain(text) {
+  function say(text) {
     el.feedback.textContent = text;
     game.speak(text);
   }
 
-  function checkAddA() {
-    const n = inBlender(q.fruitA);
-    if (n !== q.a) return tryAgain(`Count again. We need ${q.a} ${plural(fruits[q.fruitA].label, q.a)} in the blender.`);
-    items.forEach((i) => { if (i.where === "blender") i.locked = true; });
-    items = items.filter((i) => i.where === "blender");
-    items.push(...makeItems(q.fruitB, q.b + 2, "tray"));
-    phase = "addB";
-    render();
-    game.speak(el.prompt.textContent);
+  // "Done" after moving fruit: is the right number in the right place?
+  function checkMove() {
+    if (phase === "addA" && countIn("blender", q.fruitA) !== q.a) {
+      return say(`Let's check. We need ${q.a} ${plural(q.fruitA, q.a)} in the blender.`);
+    }
+    if (phase === "addB" && countIn("blender", q.fruitB) !== q.b) {
+      return say(`Let's check. Add ${q.b} ${plural(q.fruitB, q.b)}.`);
+    }
+    if (phase === "takeOut" && countIn("tray") !== q.b) {
+      return say(`Let's check. Take ${q.b} ${plural(q.fruitA, q.b)} out.`);
+    }
+    el.feedback.textContent = "";
+    goTo({ addA: "countA", addB: "countB", takeOut: "countOut" }[phase]);
   }
 
-  function checkAddB() {
-    const n = inBlender(q.fruitB, false);
-    if (n !== q.b) return tryAgain(`Count again. Add ${q.b} ${plural(fruits[q.fruitB].label, q.b)}.`);
-    blend();
-  }
-
-  function checkTakeOut() {
-    const out = items.filter((i) => i.where === "tray").length;
-    if (out !== q.b) return tryAgain(`Count again. Take ${q.b} ${plural(fruits[q.fruitA].label, q.b)} out.`);
-    blend();
+  // Practice counting step: never sent to the server.
+  function countPick(n, btn) {
+    const s = step();
+    if (n !== s.count) {
+      btn.classList.add("is-wrong");
+      btn.disabled = true;
+      return say("Not quite. Point to each one and count them slowly.");
+    }
+    btn.classList.add("is-right");
+    el.actions.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+    say(`Yes, ${n}!`);
+    setTimeout(() => { el.feedback.textContent = ""; goTo(s.then); }, config.a11y?.reducedMotion ? 300 : 700);
   }
 
   function blend() {
@@ -262,13 +305,11 @@ export function mount(root, config, game) {
       el.blenderZone.classList.remove("is-blending");
       el.blenderZone.classList.add("is-blended");
       el.blenderImg.src = config.assets.blender.full;
-      phase = "answer";
-      render();
-      game.speak(el.prompt.textContent);
+      goTo("answer");
     }, wait);
   }
 
-  // ---- answering ----------------------------------------------------------
+  // ---- the scored answer --------------------------------------------------
   let busy = false;
 
   async function answer(choice, btn) {
@@ -281,25 +322,22 @@ export function mount(root, config, game) {
     } catch (error) {
       busy = false;
       el.actions.querySelectorAll("button:not(.is-wrong)").forEach((b) => { b.disabled = false; });
-      return tryAgain("Something went wrong. Please try again.");
+      return say("Something went wrong. Please try again.");
     }
     busy = false;
 
     if (!result.correct) {
       btn.classList.add("is-wrong");
       el.actions.querySelectorAll("button:not(.is-wrong)").forEach((b) => { b.disabled = false; });
-      const hint = q.op === "+"
+      return say(q.op === "+"
         ? "Not quite. Count all the fruits in the blender, then try again."
-        : "Not quite. Count the fruits still in the blender, then try again.";
-      return tryAgain(hint);
+        : "Not quite. Count the fruits still in the blender, then try again.");
     }
 
     btn.classList.add("is-right");
     phase = "done";
     const sign = q.op === "+" ? "+" : "−";
-    const cheer = `Yes! ${q.a} ${sign} ${q.b} = ${choice}`;
-    el.feedback.textContent = cheer;
-    game.speak(cheer);
+    say(`Yes! ${q.a} ${sign} ${q.b} = ${choice}`);
     el.blenderZone.classList.add("is-cheer");
 
     if (result.done) {
@@ -307,11 +345,7 @@ export function mount(root, config, game) {
     } else if (result.sessionOpen === false) {
       el.actions.replaceChildren(actionButton("Finish", () => game.endedEarly()));
     } else {
-      el.actions.replaceChildren(actionButton("Next question", () => {
-        el.blenderZone.classList.remove("is-cheer");
-        index += 1;
-        startQuestion();
-      }));
+      el.actions.replaceChildren(actionButton("Next question", () => { index += 1; startQuestion(); }));
     }
     el.actions.querySelector("button")?.focus();
   }

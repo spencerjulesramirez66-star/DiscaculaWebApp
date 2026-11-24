@@ -1,6 +1,8 @@
 """Account business rules. Views call these; tests exercise them directly."""
 
+import logging
 import secrets
+import smtplib
 from datetime import timedelta
 
 from django.conf import settings
@@ -12,6 +14,8 @@ from django.utils.crypto import constant_time_compare, salted_hmac
 from django.utils.text import slugify
 
 from .models import EmailOTP, OTPPurpose, Role, StudentProfile, User
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Readable credentials for kids (ACC-05)
@@ -139,12 +143,20 @@ def issue_otp(user: User, purpose: str) -> None:
         "is_verify": purpose == OTPPurpose.VERIFY_EMAIL,
     }
     what = "verification" if context["is_verify"] else "password reset"
-    send_mail(
-        f"{settings.SITE_NAME}: your {what} code",
-        render_to_string("accounts/email/otp.txt", context),
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-    )
+    try:
+        send_mail(
+            f"{settings.SITE_NAME}: your {what} code",
+            render_to_string("accounts/email/otp.txt", context),
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+        )
+    except (smtplib.SMTPException, OSError) as exc:
+        # Wrong email settings or no internet must not crash sign-up: tell the person instead.
+        # (The code saved above is rolled back with this transaction.)
+        logger.exception("Could not send %s email to user %s", what, user.pk)
+        raise OTPError(
+            "We couldn't send the email right now. Please try again in a minute."
+        ) from exc
 
 
 def check_otp(user: User, purpose: str, code: str) -> None:

@@ -6,15 +6,17 @@
   <h1>{% if classroom %}{% translate "Edit class" %}{% else %}{% translate "New class" %}{% endif %}</h1>
   <form method="post" data-autosave="classroom" novalidate>
     {% csrf_token %}
-    {% if classroom %}{% translate "Save class" as submit_label %}{% else %}{% translate "Create class" as submit_label %}{% endif %}
-    {% include "components/form.html" with form=form submit_label=submit_label %}
+    {% if classroom %}{% translate "Save class" as submit_label %}{% url 'teach:classroom_detail' classroom.pk as cancel_url %}{% else %}{% translate "Create class" as submit_label %}{% url 'teach:dashboard' as cancel_url %}{% endif %}
+    {% include "components/form.html" with form=form submit_label=submit_label cancel_url=cancel_url %}
   </form>
   {% if classroom %}
-    <form method="post" action="{% url 'teach:classroom_archive' classroom.pk %}" data-confirm="{% translate 'Remove this class? It will disappear from your list.' %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn--danger btn--block">{% translate "Remove class" %}</button>
-    </form>
+    <div class="danger-zone">
+      <p class="muted small">{% translate "Not using this class any more?" %}</p>
+      <form method="post" action="{% url 'teach:classroom_archive' classroom.pk %}" data-confirm="{% translate 'Remove this class? It will disappear from your list.' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--danger btn--small">{% translate "Remove class" %}</button>
+      </form>
+    </div>
   {% endif %}
-  <a href="{% if classroom %}{% url 'teach:classroom_detail' classroom.pk %}{% else %}{% url 'teach:dashboard' %}{% endif %}">{% translate "Cancel" %}</a>
 </div>
 {% endblock %}

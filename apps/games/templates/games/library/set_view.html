@@ -10,7 +10,7 @@
     {% for q in qset.questions.all %}<li>{{ q.operand_a }} {% if q.operator == "+" %}+{% else %}−{% endif %} {{ q.operand_b }} = {{ q.answer }}</li>{% endfor %}
   </ol>
   <form method="post" action="{% url 'library:set_copy' qset.pk %}">
-    {% csrf_token %}<button type="submit" class="btn btn--primary btn--block">{% translate "Make my own copy" %}</button>
+    {% csrf_token %}<button type="submit" class="btn btn--primary btn--block">{% include "components/icon.html" with name="copy" %}{% translate "Make my own copy" %}</button>
   </form>
 </div>
 {% endblock %}

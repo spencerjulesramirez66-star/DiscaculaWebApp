@@ -12,11 +12,11 @@
     {% for m in extend_choices %}
       <form method="post" action="{% url 'teach:session_extend' session.pk %}" class="inline">
         {% csrf_token %}<input type="hidden" name="minutes" value="{{ m }}">
-        <button type="submit" class="btn btn--secondary">{% blocktranslate %}Add {{ m }} minutes{% endblocktranslate %}</button>
+        <button type="submit" class="btn btn--secondary">{% include "components/icon.html" with name="plus" %}{% blocktranslate %}Add {{ m }} minutes{% endblocktranslate %}</button>
       </form>
     {% endfor %}
     <form method="post" action="{% url 'teach:session_end' session.pk %}" class="inline" data-confirm="{% translate 'End class time for everyone?' %}">
-      {% csrf_token %}<button type="submit" class="btn btn--danger">{% translate "End class time" %}</button>
+      {% csrf_token %}<button type="submit" class="btn btn--danger">{% include "components/icon.html" with name="stop" %}{% translate "End class time" %}</button>
     </form>
   </div>
 {% else %}

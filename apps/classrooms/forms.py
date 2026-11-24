@@ -20,9 +20,10 @@ class ClassroomForm(forms.ModelForm):
 class AddStudentsForm(forms.Form):
     names = forms.CharField(
         label=_("Student names"),
-        widget=forms.Textarea(attrs={"rows": 6, "placeholder": "Maria Santos\nJuan Dela Cruz"}),
+        widget=forms.Textarea(attrs={"rows": 5}),
         help_text=_(
-            "One full name per line. We create a username and an easy password for each one."
+            "One name per line, for example: Maria Santos. "
+            "We make a username and an easy password for each one."
         ),
     )
 

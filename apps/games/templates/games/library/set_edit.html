@@ -1,44 +1,67 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load static i18n %}
 {% block title %}{% translate "Edit questions" %}{% endblock %}
 {% block content %}
-<p><a href="{% url 'library:home' %}">← {% translate "My materials" %}</a></p>
+<p class="back-link"><a href="{% url 'library:home' %}">← {% translate "My materials" %}</a></p>
 <div class="card stack narrow-wide">
-  <h1>{% translate "Edit questions" %}</h1>
-  <p class="muted">
-    {{ qset.game_type.name }} · {{ qset.get_difficulty_display }} · {{ qset.get_operation_display }}.
-    {% blocktranslate with max=qset.get_difficulty_display %}Use numbers that fit the {{ max }} level. Taking away can't go below zero.{% endblocktranslate %}
-  </p>
-  <form method="post" data-autosave="question-set-{{ qset.pk }}" novalidate class="stack">
+  <div>
+    <h1>{% translate "Edit questions" %}</h1>
+    <p class="muted">
+      {{ qset.game_type.name }} · {{ qset.get_difficulty_display }} · {{ qset.get_operation_display }}.
+      {% blocktranslate with max=qset.get_difficulty_display %}Use numbers that fit the {{ max }} level. Taking away can't go below zero.{% endblocktranslate %}
+    </p>
+  </div>
+
+  <form method="post" novalidate class="stack" data-formset>
     {% csrf_token %}
     {% for field in form %}
       <div class="field{% if field.errors %} field--error{% endif %}">
-        {{ field.label_tag }} {{ field }}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label> {{ field }}
         {% for e in field.errors %}<small class="field__error">{{ e }}</small>{% endfor %}
       </div>
     {% endfor %}
 
     {{ formset.management_form }}
     {% if formset.non_form_errors %}<div class="form-errors" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
-    <table class="table question-table">
-      <thead><tr><th>#</th><th>{% translate "First number" %}</th><th aria-hidden="true"></th><th>{% translate "Second number" %}</th><th>{% translate "Remove" %}</th></tr></thead>
-      <tbody>
-        {% for qform in formset %}
-          <tr{% if qform.errors %} class="row--error"{% endif %}>
-            <td>{{ forloop.counter }}{% for h in qform.hidden_fields %}{{ h }}{% endfor %}</td>
-            <td>{{ qform.operand_a }}</td>
-            <td class="question-table__op" aria-hidden="true">{% if qset.operation == "add" %}+{% else %}−{% endif %}</td>
-            <td>{{ qform.operand_b }}</td>
-            <td>{% if qform.instance.pk %}{{ qform.DELETE }}{% endif %}</td>
-          </tr>
+
+    <ol class="q-list" data-formset-rows>
+      {% for qform in formset %}
+        <li class="q-row{% if qform.errors %} q-row--error{% endif %}" data-formset-row>
+          {% for h in qform.hidden_fields %}{{ h }}{% endfor %}
+          <span class="q-row__num" aria-hidden="true"></span>
+          <label class="sr-only" for="{{ qform.operand_a.id_for_label }}">{% translate "First number" %}</label>
+          {{ qform.operand_a }}
+          <span class="q-row__op" aria-hidden="true">{% if qset.operation == "add" %}+{% else %}−{% endif %}</span>
+          <label class="sr-only" for="{{ qform.operand_b.id_for_label }}">{% translate "Second number" %}</label>
+          {{ qform.operand_b }}
+          {% if qform.instance.pk %}<span class="sr-only">{{ qform.DELETE }}</span>{% endif %}
+          <button type="button" class="btn btn--ghost btn--icon" data-formset-remove aria-label="{% translate 'Remove this question' %}">{% include "components/icon.html" with name="x" %}</button>
           {% if qform.errors %}
-            <tr class="row--error"><td></td><td colspan="4">{% for e in qform.non_field_errors %}<small class="field__error">{{ e }}</small> {% endfor %}{% for f in qform %}{% for e in f.errors %}<small class="field__error">{{ e }}</small> {% endfor %}{% endfor %}</td></tr>
+            <p class="q-row__errors">{% for e in qform.non_field_errors %}{{ e }} {% endfor %}{% for f in qform %}{% for e in f.errors %}{{ e }} {% endfor %}{% endfor %}</p>
           {% endif %}
-        {% endfor %}
-      </tbody>
-    </table>
-    <p class="muted">{% translate "Need more questions? Fill in the empty rows. Two new ones appear each time you save." %}</p>
-    <button type="submit" class="btn btn--primary btn--block">{% translate "Save questions" %}</button>
+        </li>
+      {% endfor %}
+    </ol>
+
+    {# A blank row, copied by "+ Add a question" (static/js/core/formset.js). #}
+    <template data-formset-empty>
+      <li class="q-row" data-formset-row>
+        {% for h in formset.empty_form.hidden_fields %}{{ h }}{% endfor %}
+        <span class="q-row__num" aria-hidden="true"></span>
+        {{ formset.empty_form.operand_a }}
+        <span class="q-row__op" aria-hidden="true">{% if qset.operation == "add" %}+{% else %}−{% endif %}</span>
+        {{ formset.empty_form.operand_b }}
+        <button type="button" class="btn btn--ghost btn--icon" data-formset-remove aria-label="{% translate 'Remove this question' %}">{% include "components/icon.html" with name="x" %}</button>
+      </li>
+    </template>
+
+    <button type="button" class="btn btn--secondary" data-formset-add>{% include "components/icon.html" with name="plus" %}{% translate "Add a question" %}</button>
+
+    <div class="form-actions">
+      <a class="btn btn--secondary" href="{% url 'library:home' %}">{% translate "Cancel" %}</a>
+      <button type="submit" class="btn btn--primary">{% translate "Save questions" %}</button>
+    </div>
   </form>
 </div>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'js/core/formset.js' %}" defer></script>{% endblock %}

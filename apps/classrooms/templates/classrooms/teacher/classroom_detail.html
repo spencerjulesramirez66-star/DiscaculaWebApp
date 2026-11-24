@@ -1,63 +1,66 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n avatars %}
 {% block title %}{{ classroom.name }}{% endblock %}
 {% block content %}
-<p><a href="{% url 'teach:dashboard' %}">← {% translate "My classes" %}</a></p>
+<p class="back-link"><a href="{% url 'teach:dashboard' %}">← {% translate "My classes" %}</a></p>
 <div class="page-head">
   <div>
     <h1>{{ classroom.name }}</h1>
     {% if classroom.description %}<p class="muted">{{ classroom.description }}</p>{% endif %}
   </div>
-  <div class="actions">
-    <a class="btn btn--secondary" href="{% url 'teach:classroom_edit' classroom.pk %}">{% translate "Edit class" %}</a>
-    {% if open_session %}
-      <a class="btn btn--primary" href="{% url 'teach:session_detail' open_session.pk %}">{% translate "Open class time" %}</a>
-    {% else %}
-      <form method="post" action="{% url 'teach:session_start' classroom.pk %}" class="inline">
-        {% csrf_token %}
-        <button type="submit" class="btn btn--primary">{% translate "Start class time" %}</button>
-      </form>
-    {% endif %}
-  </div>
+  <a class="btn btn--secondary" href="{% url 'teach:classroom_edit' classroom.pk %}">{% include "components/icon.html" with name="edit" %}{% translate "Edit class" %}</a>
 </div>
+
+{# Class time: the one big action on this page. #}
+<section class="card class-time{% if open_session %} class-time--on{% endif %}" aria-labelledby="class-time-h">
+  {% if open_session %}
+    <div class="class-time__text">
+      <h2 id="class-time-h">{% translate "Class time is on" %}</h2>
+      <p class="muted">{% blocktranslate count m=open_session.minutes_left %}Room code below · {{ m }} minute left{% plural %}Room code below · {{ m }} minutes left{% endblocktranslate %}</p>
+      <p class="class-time__code">{{ open_session.code }}</p>
+    </div>
+    <a class="btn btn--primary btn--lg" href="{% url 'teach:session_detail' open_session.pk %}">{% include "components/icon.html" with name="play" %}{% translate "Open class time" %}</a>
+  {% else %}
+    <div class="class-time__text">
+      <h2 id="class-time-h">{% translate "Class time" %}</h2>
+      <p class="muted">{% translate "Start it when your students are ready. You'll get a room code for them to type." %}</p>
+    </div>
+    <form method="post" action="{% url 'teach:session_start' classroom.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn--primary btn--lg">{% include "components/icon.html" with name="play" %}{% translate "Start class time" %}</button>
+    </form>
+  {% endif %}
+</section>
 
 <div class="split">
   <section class="card stack" aria-labelledby="students-h">
     <h2 id="students-h">{% blocktranslate count n=active|length %}{{ n }} student{% plural %}{{ n }} students{% endblocktranslate %}</h2>
     {% if active %}
-      <div class="table-wrap">
-        <table class="table">
-          <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Username" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
-          <tbody>
-            {% for e in active %}
-              <tr>
-                <td><a href="{% url 'teach:student_detail' classroom.pk e.student.pk %}">{{ e.student.full_name }}</a></td>
-                <td><code>{{ e.student.username }}</code></td>
-                <td class="table__actions">
-                  <form method="post" action="{% url 'teach:student_reset_password' classroom.pk e.student.pk %}" class="inline" data-confirm="{% translate 'Give this student a new password?' %}">
-                    {% csrf_token %}<button type="submit" class="btn btn--small btn--secondary">{% translate "Reset password" %}</button>
-                  </form>
-                  <form method="post" action="{% url 'teach:student_remove' classroom.pk e.student.pk %}" class="inline" data-confirm="{% translate 'Remove this student from the class?' %}">
-                    {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Remove" %}</button>
-                  </form>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      <ul class="person-list">
+        {% for e in active %}
+          <li class="person-list__row">
+            <a class="person-list__link" href="{% url 'teach:student_detail' classroom.pk e.student.pk %}">
+              {% avatar e.student "md" %}
+              <span class="person-list__name">{{ e.student.full_name }}<small>{{ e.student.username }}</small></span>
+              <span class="person-list__go">{% translate "View" %}{% include "components/icon.html" with name="chevron" %}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
     {% else %}
-      <p class="muted">{% translate "No students yet. Add them here, or start class time and let them join with the room code." %}</p>
+      <p class="muted">{% translate "No students yet. Add them on the right, or start class time and let them join with the room code." %}</p>
     {% endif %}
     {% if removed %}
-      <details>
+      <details class="removed">
         <summary>{% blocktranslate count n=removed|length %}{{ n }} removed student{% plural %}{{ n }} removed students{% endblocktranslate %}</summary>
-        <ul class="plain-list">
+        <ul class="person-list person-list--quiet">
           {% for e in removed %}
-            <li><a href="{% url 'teach:student_detail' classroom.pk e.student.pk %}">{{ e.student.full_name }}</a> <code>{{ e.student.username }}</code>
-              <form method="post" action="{% url 'teach:student_restore' classroom.pk e.student.pk %}" class="inline">
-                {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Add back" %}</button>
-              </form>
+            <li class="person-list__row">
+              <a class="person-list__link" href="{% url 'teach:student_detail' classroom.pk e.student.pk %}">
+                {% avatar e.student "sm" %}
+                <span class="person-list__name">{{ e.student.full_name }}<small>{{ e.student.username }}</small></span>
+                <span class="person-list__go">{% translate "View" %}{% include "components/icon.html" with name="chevron" %}</span>
+              </a>
             </li>
           {% endfor %}
         </ul>
@@ -65,24 +68,24 @@
     {% endif %}
   </section>
 
-  <section class="card stack" aria-labelledby="add-h">
-    <h2 id="add-h">{% translate "Add students" %}</h2>
-    <form method="post" action="{% url 'teach:students_add' classroom.pk %}" data-autosave="add-students" novalidate>
-      {% csrf_token %}
-      {% translate "Create accounts" as submit_label %}
-      {% include "components/form.html" with form=add_form submit_label=submit_label %}
-    </form>
-    <p class="muted">{% translate "Students who already have an account just type the room code." %}</p>
-  </section>
+  <div class="stack">
+    <section class="card stack" aria-labelledby="add-h">
+      <h2 id="add-h">{% translate "Add students" %}</h2>
+      <form method="post" action="{% url 'teach:students_add' classroom.pk %}" data-autosave="add-students" novalidate>
+        {% csrf_token %}
+        {% translate "Create accounts" as submit_label %}
+        {% include "components/form.html" with form=add_form submit_label=submit_label submit_icon="plus" %}
+      </form>
+      <p class="muted small">{% translate "Students who already have an account just type the room code." %}</p>
+    </section>
 
-  <section class="card stack" aria-labelledby="games-h">
-    <h2 id="games-h">{% translate "Games" %}</h2>
-    <p class="muted">{% translate "Choose which questions and how-to video this class uses." %}</p>
-    <ul class="plain-list">
+    <section class="card stack" aria-labelledby="games-h">
+      <h2 id="games-h">{% translate "Games" %}</h2>
+      <p class="muted">{% translate "Choose which questions and how-to video this class uses." %}</p>
       {% for g in games %}
-        <li><a href="{% url 'library:class_game' classroom.pk g.key %}">{% blocktranslate with game=g.name %}{{ game }} settings{% endblocktranslate %}</a></li>
+        <a class="btn btn--secondary btn--block" href="{% url 'library:class_game' classroom.pk g.key %}">{% include "components/icon.html" with name="gear" %}{% blocktranslate with game=g.name %}{{ game }} settings{% endblocktranslate %}</a>
       {% endfor %}
-    </ul>
-  </section>
+    </section>
+  </div>
 </div>
 {% endblock %}

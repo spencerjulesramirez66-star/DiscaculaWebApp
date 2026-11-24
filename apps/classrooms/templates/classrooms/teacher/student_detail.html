@@ -2,7 +2,7 @@
 {% load i18n avatars %}
 {% block title %}{{ student.full_name }}{% endblock %}
 {% block content %}
-<p><a href="{% url 'teach:classroom_detail' classroom.pk %}">← {{ classroom.name }}</a></p>
+<p class="back-link"><a href="{% url 'teach:classroom_detail' classroom.pk %}">← {{ classroom.name }}</a></p>
 <div class="page-head">
   <div class="cell-person">
     {% avatar student "lg" %}
@@ -12,6 +12,26 @@
     </div>
   </div>
 </div>
+
+{# Manage: account actions that used to sit on every row of the class list. #}
+<section class="card manage" aria-labelledby="manage-h">
+  <h2 id="manage-h">{% translate "Manage" %}</h2>
+  <div class="actions">
+    {% if enrollment.is_active %}
+      <form method="post" action="{% url 'teach:student_reset_password' classroom.pk student.pk %}" data-confirm="{% translate 'Give this student a new password?' %}">
+        {% csrf_token %}<button type="submit" class="btn btn--secondary">{% include "components/icon.html" with name="key" %}{% translate "Give a new password" %}</button>
+      </form>
+      <form method="post" action="{% url 'teach:student_remove' classroom.pk student.pk %}" data-confirm="{% translate 'Remove this student from the class? Their history is kept.' %}">
+        {% csrf_token %}<button type="submit" class="btn btn--danger">{% include "components/icon.html" with name="user-minus" %}{% translate "Remove from class" %}</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'teach:student_restore' classroom.pk student.pk %}">
+        {% csrf_token %}<button type="submit" class="btn btn--primary">{% include "components/icon.html" with name="undo" %}{% translate "Add back to class" %}</button>
+      </form>
+    {% endif %}
+  </div>
+  <p class="muted small">{% translate "Forgot their password? Give a new one and print their login card." %}</p>
+</section>
 
 <details class="card a11y-settings" {% if a11y_form.errors %}open{% endif %}>
   <summary>

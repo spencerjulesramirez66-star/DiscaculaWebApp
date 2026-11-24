@@ -4,7 +4,7 @@
 {% block content %}
 <div class="page-head">
   <h1>{% translate "My classes" %}</h1>
-  <a class="btn btn--primary" href="{% url 'teach:classroom_create' %}">{% translate "Create a class" %}</a>
+  <a class="btn btn--primary" href="{% url 'teach:classroom_create' %}">{% include "components/icon.html" with name="plus" %}{% translate "Create a class" %}</a>
 </div>
 {% if classrooms %}
   <div class="card-grid">

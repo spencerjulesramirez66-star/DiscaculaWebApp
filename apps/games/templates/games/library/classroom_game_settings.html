@@ -12,7 +12,7 @@
       <p class="banner">{% translate "You don't have your own questions for this game yet." %} <a href="{% url 'library:home' %}">{% translate "Make some in My materials" %}</a></p>
     {% endif %}
     {% translate "Save settings" as submit_label %}
-    {% include "components/form.html" with form=form submit_label=submit_label %}
+    {% url 'teach:classroom_detail' classroom.pk as cancel_url %}{% include "components/form.html" with form=form submit_label=submit_label cancel_url=cancel_url %}
   </form>
 </div>
 {% endblock %}

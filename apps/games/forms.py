@@ -73,7 +73,7 @@ QuestionFormSet = inlineformset_factory(
     Question,
     form=QuestionForm,
     formset=BaseQuestionFormSet,
-    extra=2,
+    extra=0,  # rows are added in the page with "+ Add a question"
     can_delete=True,
     max_num=MAX_QUESTIONS_PER_SET,
     validate_max=True,
@@ -106,9 +106,7 @@ class ClassroomGameConfigForm(forms.ModelForm):
         self.fields["question_sets"].queryset = QuestionSet.objects.filter(
             owner=teacher, game_type=game_type
         ).order_by("difficulty", "operation", "title")
-        self.fields["question_sets"].label_from_instance = lambda s: (
-            f"{s.title} · {s.get_difficulty_display()} {s.get_operation_display()}"
-        )
+        self.fields["question_sets"].label_from_instance = lambda s: s.title
         self.fields["video"].queryset = Video.objects.filter(
             Q(owner__isnull=True) | Q(owner=teacher), game_type=game_type
         )

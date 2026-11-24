@@ -1,11 +1,11 @@
 [project]
 name = "webapp-dyscalculia"
 version = "0.1.0"
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 
 [tool.ruff]
 line-length = 100
-target-version = "py314"
+target-version = "py312"
 extend-exclude = ["**/migrations/*.py"]
 
 [tool.ruff.lint]

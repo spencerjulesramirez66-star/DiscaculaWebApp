@@ -42,8 +42,13 @@ def dashboard(request):
     classrooms = (
         request.user.classrooms.filter(is_archived=False)
         .annotate(
-            student_count=Count("enrollments", filter=Q(enrollments__is_active=True)),
-            open_sessions=Count("sessions", filter=Q(sessions__status=SessionStatus.OPEN)),
+            # distinct=True: two joins (enrollments × sessions) would otherwise multiply counts.
+            student_count=Count(
+                "enrollments", filter=Q(enrollments__is_active=True), distinct=True
+            ),
+            open_sessions=Count(
+                "sessions", filter=Q(sessions__status=SessionStatus.OPEN), distinct=True
+            ),
         )
         .order_by("name")
     )
@@ -91,7 +96,9 @@ def classroom_archive(request, pk):
 def classroom_detail(request, pk):
     classroom = _my_classroom(request, pk)
     services.expire_due_sessions()
-    enrollments = classroom.enrollments.select_related("student").order_by("student__full_name")
+    enrollments = classroom.enrollments.select_related("student__student_profile").order_by(
+        "student__full_name"
+    )
     return render(
         request,
         "classrooms/teacher/classroom_detail.html",
@@ -147,7 +154,7 @@ def student_restore(request, pk, student_pk):
     student = _student_in(classroom, student_pk)
     services.restore_student(classroom, student)
     messages.success(request, _("%(name)s is back in the class.") % {"name": student})
-    return redirect("teach:classroom_detail", pk=classroom.pk)
+    return redirect("teach:student_detail", pk=classroom.pk, student_pk=student.pk)
 
 
 @require_POST

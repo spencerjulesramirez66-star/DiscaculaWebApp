@@ -102,3 +102,26 @@ def test_dev_settings_accept_tunnel_addresses():
     dev = importlib.import_module("config.settings.dev")
     assert ".ngrok-free.app" in dev.ALLOWED_HOSTS and ".trycloudflare.com" in dev.ALLOWED_HOSTS
     assert "https://*.ngrok-free.app" in dev.CSRF_TRUSTED_ORIGINS
+
+
+def test_login_works_through_an_ngrok_link():
+    """A real browser on https://<name>.ngrok-free.dev posts the login form through the tunnel."""
+    from django.test import Client, override_settings
+
+    dev = importlib.import_module("config.settings.dev")  # the settings runserver uses
+    _demo()
+    browser = Client(enforce_csrf_checks=True)
+    host = "demo-class.ngrok-free.dev"
+    with override_settings(
+        ALLOWED_HOSTS=dev.ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS=dev.CSRF_TRUSTED_ORIGINS
+    ):
+        page = browser.get(reverse("accounts:login"), HTTP_HOST=host)
+        assert page.status_code == 200
+        token = page.cookies["csrftoken"].value
+        response = browser.post(
+            reverse("accounts:login"),
+            {"username": "maria", "password": "apple-123", "csrfmiddlewaretoken": token},
+            HTTP_HOST=host,
+            HTTP_ORIGIN=f"https://{host}",
+        )
+    assert response.status_code == 302, "login was refused (CSRF / host)"

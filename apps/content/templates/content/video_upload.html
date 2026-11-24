@@ -8,7 +8,7 @@
   <form method="post" enctype="multipart/form-data" data-autosave="video-upload" novalidate>
     {% csrf_token %}
     {% translate "Upload video" as submit_label %}
-    {% include "components/form.html" with form=form submit_label=submit_label %}
+    {% url 'library:home' as cancel_url %}{% include "components/form.html" with form=form submit_label=submit_label cancel_url=cancel_url submit_icon="upload" %}
   </form>
 </div>
 {% endblock %}

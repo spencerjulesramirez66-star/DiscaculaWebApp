@@ -9,7 +9,15 @@ DEBUG = True
 # localtunnel. Their addresses change every time, so allow the whole tunnel domain in dev.
 # Login and every button need CSRF_TRUSTED_ORIGINS, because the browser is on https while
 # Django sees plain http behind the tunnel. See docs/14-hosting.md.
-TUNNEL_DOMAINS = [".ngrok-free.app", ".ngrok.app", ".trycloudflare.com", ".loca.lt"]
+TUNNEL_DOMAINS = [
+    ".ngrok-free.app",
+    ".ngrok-free.dev",
+    ".ngrok.app",
+    ".ngrok.dev",
+    ".ngrok.io",
+    ".trycloudflare.com",
+    ".loca.lt",
+]
 ALLOWED_HOSTS = [*ALLOWED_HOSTS, *TUNNEL_DOMAINS]
 CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, *(f"https://*{d}" for d in TUNNEL_DOMAINS)]
 

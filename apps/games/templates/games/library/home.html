@@ -7,7 +7,7 @@
     <h1>{% translate "My materials" %}</h1>
     <p class="muted">{% translate "Make your own copy of the ready-made questions, change them, then pick them for a class." %}</p>
   </div>
-  <a class="btn btn--primary" href="{% url 'videos:upload' %}">{% translate "Upload a video" %}</a>
+  <a class="btn btn--primary" href="{% url 'videos:upload' %}">{% include "components/icon.html" with name="upload" %}{% translate "Upload a video" %}</a>
 </div>
 
 <section class="card stack" aria-labelledby="my-sets-h">
@@ -21,9 +21,9 @@
             <tr>
               <td>{{ s.title }}</td><td>{{ s.game_type.name }}</td><td>{{ s.get_difficulty_display }}</td><td>{{ s.get_operation_display }}</td><td>{{ s.question_count }}</td>
               <td class="table__actions">
-                <a class="btn btn--small btn--secondary" href="{% url 'library:set_edit' s.pk %}">{% translate "Edit" %}</a>
+                <a class="btn btn--small btn--secondary" href="{% url 'library:set_edit' s.pk %}">{% include "components/icon.html" with name="edit" %}{% translate "Edit" %}</a>
                 <form method="post" action="{% url 'library:set_delete' s.pk %}" class="inline" data-confirm="{% translate 'Delete this question list?' %}">
-                  {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Delete" %}</button>
+                  {% csrf_token %}<button type="submit" class="btn btn--small btn--danger">{% translate "Delete" %}</button>
                 </form>
               </td>
             </tr>
@@ -47,7 +47,7 @@
             <td><a href="{% url 'library:set_view' s.pk %}">{{ s.title }}</a></td><td>{{ s.game_type.name }}</td><td>{{ s.question_count }}</td>
             <td class="table__actions">
               <form method="post" action="{% url 'library:set_copy' s.pk %}" class="inline">
-                {% csrf_token %}<button type="submit" class="btn btn--small btn--secondary">{% translate "Make my own copy" %}</button>
+                {% csrf_token %}<button type="submit" class="btn btn--small btn--secondary">{% include "components/icon.html" with name="copy" %}{% translate "Make my own copy" %}</button>
               </form>
             </td>
           </tr>
@@ -71,7 +71,7 @@
             <td class="table__actions">
               {% if not v.is_default %}
                 <form method="post" action="{% url 'videos:delete' v.pk %}" class="inline" data-confirm="{% translate 'Delete this video?' %}">
-                  {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Delete" %}</button>
+                  {% csrf_token %}<button type="submit" class="btn btn--small btn--danger">{% translate "Delete" %}</button>
                 </form>
               {% endif %}
             </td>

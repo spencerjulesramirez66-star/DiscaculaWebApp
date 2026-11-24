@@ -10,7 +10,7 @@ what a round looks like and whether an answer is right.
 
 from abc import ABC, abstractmethod
 
-_REGISTRY: dict[str, GamePlugin] = {}
+_REGISTRY: dict[str, "GamePlugin"] = {}
 
 
 class GamePlugin(ABC):
@@ -25,7 +25,7 @@ class GamePlugin(ABC):
     def check_answer(self, question: dict, answer) -> bool:
         try:
             return int(answer) == int(question["answer"])
-        except TypeError, ValueError, KeyError:
+        except (TypeError, ValueError, KeyError):
             return False
 
 

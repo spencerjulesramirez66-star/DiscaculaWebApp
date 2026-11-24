@@ -219,3 +219,38 @@ def test_forgot_password_without_email_sends_nothing_and_reveals_nothing(client,
 
 def test_reset_page_requires_forgot_step(client):
     assert client.get(reverse("accounts:reset_password")).url == reverse("accounts:forgot_password")
+
+
+def test_signup_survives_email_failure(client):
+    """Wrong Gmail settings / no internet: friendly message, no crash, account still created."""
+    import smtplib
+    from unittest import mock
+
+    boom = smtplib.SMTPServerDisconnected("Connection unexpectedly closed")
+    with mock.patch("apps.accounts.services.send_mail", side_effect=boom):
+        response = client.post(
+            reverse("accounts:signup_teacher"),
+            {
+                "full_name": "Dina Cruz",
+                "email": "dina@school.test",
+                "password1": PASSWORD,
+                "password2": PASSWORD,
+            },
+            follow=True,
+        )
+    assert response.status_code == 200
+    assert "couldn&#x27;t send the email" in response.content.decode()
+    user = User.objects.get(email="dina@school.test")
+    assert not user.otps.exists()  # the unsent code was rolled back
+    # Resend works once email is fixed (cooldown doesn't block: nothing was sent).
+    client.post(reverse("accounts:resend_verification"))
+    assert user.otps.count() == 1 and len(mail.outbox) == 1
+
+
+def test_forgot_password_survives_email_failure(client):
+    from unittest import mock
+
+    services.create_student(full_name="Kid", username="kid", password=PASSWORD, email="p@x.test")
+    with mock.patch("apps.accounts.services.send_mail", side_effect=OSError("network down")):
+        response = client.post(reverse("accounts:forgot_password"), {"identifier": "kid"})
+    assert response.status_code == 302  # same neutral response, no crash

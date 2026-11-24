@@ -66,8 +66,13 @@ def signup_teacher(request):
             password=form.cleaned_data["password1"],
         )
         login(request, user)
-        services.issue_otp(user, OTPPurpose.VERIFY_EMAIL)
-        messages.success(request, _("Account created. We sent a 6-digit code to your email."))
+        try:
+            services.issue_otp(user, OTPPurpose.VERIFY_EMAIL)
+        except services.OTPError as exc:
+            # Account exists; they can press "Send a new code" on the next page.
+            messages.warning(request, _("Account created. ") + str(exc))
+        else:
+            messages.success(request, _("Account created. We sent a 6-digit code to your email."))
         return redirect("accounts:verify_email")
     return render(request, "accounts/signup_teacher.html", {"form": form})
 

@@ -1,18 +1,45 @@
-{# Usage: {% include "components/form.html" with form=form submit_label="Save" %} #}
+{% comment %}
+Usage: {% include "components/form.html" with form=form submit_label="Save" %}
+Optional: cancel_url="..." puts a Cancel button next to the main one;
+          submit_icon="plus" adds an icon to the main button.
+Labels have no trailing colon on purpose (plain, calm look).
+{% endcomment %}
 {% load i18n %}
 {% if form.non_field_errors %}
   <div class="form-errors" role="alert">{{ form.non_field_errors }}</div>
 {% endif %}
 {% for field in form.hidden_fields %}{{ field }}{% endfor %}
 {% for field in form.visible_fields %}
-  <div class="field{% if field.errors %} field--error{% endif %}{% if field.widget_type == 'checkbox' %} field--checkbox{% endif %}">
-    {% if field.widget_type == 'checkbox' %}
-      {{ field }} {{ field.label_tag }}
-    {% else %}
-      {{ field.label_tag }} {{ field }}
-    {% endif %}
-    {% if field.help_text %}<small class="field__help" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</small>{% endif %}
-    {% for error in field.errors %}<small class="field__error">{{ error }}</small>{% endfor %}
-  </div>
+  {% if field.widget_type == "checkboxselectmultiple" or field.widget_type == "radioselect" %}
+    <fieldset class="field field--choices{% if field.errors %} field--error{% endif %}">
+      <legend>{{ field.label }}</legend>
+      {% if field.help_text %}<small class="field__help">{{ field.help_text|safe }}</small>{% endif %}
+      <div class="choice-list">
+        {% for option in field %}
+          <label class="choice-list__item">{{ option.tag }} <span>{{ option.choice_label }}</span></label>
+        {% empty %}
+          <p class="muted">{% translate "Nothing to choose yet." %}</p>
+        {% endfor %}
+      </div>
+      {% for error in field.errors %}<small class="field__error">{{ error }}</small>{% endfor %}
+    </fieldset>
+  {% else %}
+    <div class="field{% if field.errors %} field--error{% endif %}{% if field.widget_type == 'checkbox' %} field--checkbox{% endif %}">
+      {% if field.widget_type == "checkbox" %}
+        {{ field }} <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {% else %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label> {{ field }}
+      {% endif %}
+      {% if field.help_text %}<small class="field__help" id="{{ field.auto_id }}_helptext">{{ field.help_text|safe }}</small>{% endif %}
+      {% for error in field.errors %}<small class="field__error">{{ error }}</small>{% endfor %}
+    </div>
+  {% endif %}
 {% endfor %}
-<button type="submit" class="btn btn--primary btn--block">{{ submit_label|default:_("Submit") }}</button>
+{% if cancel_url %}
+  <div class="form-actions">
+    <a class="btn btn--secondary" href="{{ cancel_url }}">{% translate "Cancel" %}</a>
+    <button type="submit" class="btn btn--primary">{% if submit_icon %}{% include "components/icon.html" with name=submit_icon %}{% endif %}{{ submit_label|default:_("Submit") }}</button>
+  </div>
+{% else %}
+  <button type="submit" class="btn btn--primary btn--block">{% if submit_icon %}{% include "components/icon.html" with name=submit_icon %}{% endif %}{{ submit_label|default:_("Submit") }}</button>
+{% endif %}
