@@ -31,7 +31,7 @@
           <tbody>
             {% for e in active %}
               <tr>
-                <td>{{ e.student.full_name }}</td>
+                <td><a href="{% url 'teach:student_detail' classroom.pk e.student.pk %}">{{ e.student.full_name }}</a></td>
                 <td><code>{{ e.student.username }}</code></td>
                 <td class="table__actions">
                   <form method="post" action="{% url 'teach:student_reset_password' classroom.pk e.student.pk %}" class="inline" data-confirm="{% translate 'Give this student a new password?' %}">
@@ -54,7 +54,7 @@
         <summary>{% blocktranslate count n=removed|length %}{{ n }} removed student{% plural %}{{ n }} removed students{% endblocktranslate %}</summary>
         <ul class="plain-list">
           {% for e in removed %}
-            <li>{{ e.student.full_name }} <code>{{ e.student.username }}</code>
+            <li><a href="{% url 'teach:student_detail' classroom.pk e.student.pk %}">{{ e.student.full_name }}</a> <code>{{ e.student.username }}</code>
               <form method="post" action="{% url 'teach:student_restore' classroom.pk e.student.pk %}" class="inline">
                 {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Add back" %}</button>
               </form>
@@ -67,12 +67,22 @@
 
   <section class="card stack" aria-labelledby="add-h">
     <h2 id="add-h">{% translate "Add students" %}</h2>
-    <form method="post" action="{% url 'teach:students_add' classroom.pk %}" novalidate>
+    <form method="post" action="{% url 'teach:students_add' classroom.pk %}" data-autosave="add-students" novalidate>
       {% csrf_token %}
       {% translate "Create accounts" as submit_label %}
       {% include "components/form.html" with form=add_form submit_label=submit_label %}
     </form>
     <p class="muted">{% translate "Students who already have an account can join with the room code instead." %}</p>
+  </section>
+
+  <section class="card stack" aria-labelledby="games-h">
+    <h2 id="games-h">{% translate "Games" %}</h2>
+    <p class="muted">{% translate "Choose your own question sets and tutorial video for this class." %}</p>
+    <ul class="plain-list">
+      {% for g in games %}
+        <li><a href="{% url 'library:class_game' classroom.pk g.key %}">{% blocktranslate with game=g.name %}{{ game }} settings{% endblocktranslate %}</a></li>
+      {% endfor %}
+    </ul>
   </section>
 </div>
 {% endblock %}

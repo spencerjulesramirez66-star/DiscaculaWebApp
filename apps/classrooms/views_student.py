@@ -1,6 +1,9 @@
 """Student-side views: enter room code, session home, status polling (namespace "play")."""
 
+from urllib.parse import urlencode
+
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from apps.accounts.decorators import student_required
 from apps.games.models import Category, GameType
@@ -42,7 +45,12 @@ def join(request):
         except services.JoinError as exc:
             form.add_error("code", str(exc))
         else:
-            return redirect("play:session", pk=session.pk)
+            session_url = reverse("play:session", args=[session.pk])
+            profile = getattr(request.user, "student_profile", None)
+            if profile is None or not profile.has_avatar:
+                # First time ever: make a character before playing (docs/05-flows.md).
+                return redirect(f"{reverse('accounts:avatar')}?{urlencode({'next': session_url})}")
+            return redirect(session_url)
     return render(request, "classrooms/student/join.html", {"form": form})
 
 

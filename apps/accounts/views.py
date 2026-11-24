@@ -5,11 +5,13 @@ from django.contrib.auth import login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from . import services
-from .decorators import teacher_required
+from . import avatars, services
+from .decorators import student_required, teacher_required
 from .forms import (
     ForgotPasswordForm,
     LoginForm,
@@ -18,7 +20,7 @@ from .forms import (
     StudentSignupForm,
     TeacherSignupForm,
 )
-from .models import OTPPurpose
+from .models import OTPPurpose, StudentProfile
 
 RESET_SESSION_KEY = "password_reset_identifier"
 
@@ -154,3 +156,63 @@ def reset_password(request):
             messages.success(request, _("Password changed. You can log in now."))
             return redirect("accounts:login")
     return render(request, "accounts/reset_password.html", {"form": form})
+
+
+# ---------------------------------------------------------------------------
+# Avatar builder (STU-01)
+# ---------------------------------------------------------------------------
+def _safe_next(request, fallback: str) -> str:
+    target = request.POST.get("next") or request.GET.get("next") or ""
+    if url_has_allowed_host_and_scheme(target, {request.get_host()}, request.is_secure()):
+        return target
+    return fallback
+
+
+@student_required
+def avatar_builder(request):
+    profile, _created = StudentProfile.objects.get_or_create(user=request.user)
+    manifest = avatars.pack_manifest(profile.avatar.get("pack") if profile.avatar else None)
+    current = avatars.clean_avatar(profile.avatar or {}, manifest)
+    next_url = _safe_next(request, reverse("play:join"))
+
+    if request.method == "POST":
+        profile.avatar = avatars.clean_avatar(request.POST.dict(), manifest)
+        profile.save(update_fields=["avatar", "updated_at"])
+        messages.success(request, _("Looking great!"))
+        return redirect(next_url)
+
+    layers, colors, color_key = [], {}, ""
+    for layer in sorted(manifest["layers"], key=lambda item: item.get("z", 0)):
+        is_color = layer.get("type") == "color"
+        if is_color:
+            color_key = layer["key"]
+            colors = {o["id"]: o["value"] for o in layer["options"]}
+        options = [
+            {
+                **option,
+                "selected": current.get(layer["key"]) == option["id"],
+                "markup": "" if is_color else avatars.layer_markup(manifest["id"], option),
+            }
+            for option in layer["options"]
+        ]
+        layers.append(
+            {
+                **layer,
+                "options": options,
+                "is_color": is_color,
+                "optional": not layer.get("required"),
+                "none_selected": current.get(layer["key"]) == avatars.NONE,
+            }
+        )
+    return render(
+        request,
+        "accounts/avatar_builder.html",
+        {
+            "layers": layers,
+            "state": {"choices": current, "colors": colors, "colorKey": color_key},
+            "initial_color": colors.get(current.get(color_key), "currentColor"),
+            "next": next_url,
+            "first_time": not profile.has_avatar,
+            "NONE": avatars.NONE,
+        },
+    )

@@ -21,5 +21,6 @@
     {% endfor %}
     <button type="submit" class="btn btn--primary btn--lg btn--block">{% translate "Start game" %}</button>
   </form>
+  <a class="btn btn--secondary btn--block" href="{% url 'games:tutorial' session.pk game.key %}">{% translate "Watch how to play again" %}</a>
 </div>
 {% endblock %}

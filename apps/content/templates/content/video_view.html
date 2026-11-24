@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ video.title }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'library:home' %}">← {% translate "Library" %}</a></p>
+<div class="card stack">
+  <h1>{{ video.title }}</h1>
+  <p class="muted">{{ video.game_type.name }}{% if video.is_default %} · {% translate "Default" %}{% endif %}</p>
+  {% if video.url %}
+    <video class="tutorial__video" controls preload="metadata">
+      <source src="{{ video.url }}" type="{{ video.mime_type }}">
+      {% if video.captions_url %}<track kind="captions" src="{{ video.captions_url }}" srclang="en" label="English" default>{% endif %}
+    </video>
+  {% else %}
+    <p class="banner">{% translate "No video file yet." %}</p>
+  {% endif %}
+</div>
+{% endblock %}

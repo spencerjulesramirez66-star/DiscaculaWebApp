@@ -4,7 +4,7 @@
 {% block content %}
 <div class="narrow card stack">
   <h1>{% if classroom %}{% translate "Edit class" %}{% else %}{% translate "New class" %}{% endif %}</h1>
-  <form method="post" novalidate>
+  <form method="post" data-autosave="classroom" novalidate>
     {% csrf_token %}
     {% if classroom %}{% translate "Save class" as submit_label %}{% else %}{% translate "Create class" as submit_label %}{% endif %}
     {% include "components/form.html" with form=form submit_label=submit_label %}

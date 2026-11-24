@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load i18n avatars %}
+{% block title %}{{ student.full_name }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'teach:classroom_detail' classroom.pk %}">← {{ classroom.name }}</a></p>
+<div class="page-head">
+  <div class="cell-person">
+    {% avatar student "lg" %}
+    <div>
+      <h1>{{ student.full_name }}</h1>
+      <p class="muted"><code>{{ student.username }}</code>{% if not enrollment.is_active %} · {% translate "removed from this class" %}{% endif %}</p>
+    </div>
+  </div>
+</div>
+
+<section class="stat-grid" aria-label="{% translate 'Summary' %}">
+  <div class="stat card"><span class="stat__value">{{ summary.rounds_played }}</span><span class="stat__label">{% translate "Rounds played" %}</span></div>
+  <div class="stat card"><span class="stat__value">{{ summary.rounds_finished }}</span><span class="stat__label">{% translate "Rounds finished" %}</span></div>
+  <div class="stat card"><span class="stat__value">{% if summary.avg_score is not None %}{{ summary.avg_score }}%{% else %}—{% endif %}</span><span class="stat__label">{% translate "Average first-try score" %}</span></div>
+  <div class="stat card"><span class="stat__value">{% if summary.avg_seconds_per_question is not None %}{{ summary.avg_seconds_per_question }} s{% else %}—{% endif %}</span><span class="stat__label">{% translate "Average time per question" %}</span></div>
+</section>
+
+<div class="split">
+  <section class="card stack" aria-labelledby="levels-h">
+    <h2 id="levels-h">{% translate "By level" %}</h2>
+    {% if summary.by_level %}
+      <table class="table">
+        <thead><tr><th>{% translate "Game" %}</th><th>{% translate "Level" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Rounds" %}</th><th>{% translate "Average" %}</th></tr></thead>
+        <tbody>
+          {% for row in summary.by_level %}
+            <tr><td>{{ row.game_type__name }}</td><td>{{ row.level }}</td><td>{{ row.kind }}</td><td>{{ row.rounds }}</td><td>{{ row.avg }}%</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="muted">{% translate "No finished rounds yet." %}</p>
+    {% endif %}
+  </section>
+  <section class="card stack" aria-labelledby="struggle-h">
+    <h2 id="struggle-h">{% translate "Needed extra help" %}</h2>
+    {% if summary.struggled %}
+      <p class="muted">{% blocktranslate with n=struggle_tries %}Questions that took {{ n }} or more tries:{% endblocktranslate %}</p>
+      <ul class="chip-list">{% for q in summary.struggled %}<li class="chip">{{ q }}</li>{% endfor %}</ul>
+    {% else %}
+      <p class="muted">{% translate "Nothing stands out yet." %}</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card stack history" aria-labelledby="rounds-h">
+  <h2 id="rounds-h">{% translate "Rounds" %}</h2>
+  {% if details %}
+    {% if summary.rounds_played > shown %}<p class="muted">{% blocktranslate %}Showing the latest {{ shown }} rounds.{% endblocktranslate %}</p>{% endif %}
+    {% for d in details %}
+      <details class="history__round">
+        <summary>
+          <span class="history__when">{{ d.round.started_at|date:"M j, H:i" }}</span>
+          <span>{{ d.round.game_type.name }} · {{ d.round.get_difficulty_display }} {{ d.round.get_operation_display|lower }}</span>
+          <span class="history__score">
+            {% if d.round.is_complete %}<strong>{{ d.round.score_percent }}%</strong>
+            {% else %}<span class="badge">{% blocktranslate with a=d.progress.answered t=d.progress.total %}Unfinished · {{ a }}/{{ t }}{% endblocktranslate %}</span>{% endif %}
+          </span>
+        </summary>
+        <p class="muted">{{ d.round.session.classroom.name }}</p>
+        <table class="table">
+          <thead><tr><th>{% translate "Question" %}</th><th>{% translate "Answers given" %}</th><th>{% translate "Tries" %}</th><th>{% translate "Time" %}</th></tr></thead>
+          <tbody>
+            {% for q in d.questions %}
+              <tr{% if q.struggled %} class="row--flag"{% endif %}>
+                <td>{{ q.text }} = {{ q.answer }}</td>
+                <td>
+                  {% for t in q.tries %}<span class="answer {% if t.is_correct %}answer--right{% else %}answer--wrong{% endif %}">{{ t.answer_given }}</span>{% empty %}<span class="muted">{% translate "not reached" %}</span>{% endfor %}
+                </td>
+                <td>{% if q.tries %}{{ q.tries|length }}{% if q.right_first_time %} <span class="badge badge--live">{% translate "first try" %}</span>{% endif %}{% else %}—{% endif %}</td>
+                <td>{% if q.seconds is not None %}{{ q.seconds }} s{% else %}—{% endif %}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+    {% endfor %}
+  {% else %}
+    <p class="muted">{% translate "This student hasn't played in your classes yet." %}</p>
+  {% endif %}
+</section>
+{% endblock %}

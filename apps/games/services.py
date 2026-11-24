@@ -4,12 +4,13 @@ import random
 from dataclasses import dataclass
 
 from django.db import IntegrityError, transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.classrooms.models import SessionParticipant
 
 from . import questions as question_utils
-from .models import Attempt, Difficulty, GameRound, GameType, Operation, QuestionSet
+from .models import Attempt, Difficulty, GameRound, GameType, Operation, Question, QuestionSet
 from .registry import get_plugin
 
 PLAYABLE_OPERATIONS = (Operation.ADD, Operation.SUB)
@@ -25,16 +26,64 @@ def playable_game(key: str) -> GameType | None:
 
 
 def resolve_question_set(
-    game_type: GameType, difficulty: str, operation: str
+    game_type: GameType, difficulty: str, operation: str, classroom=None
 ) -> QuestionSet | None:
-    """Which questions to use. Step 5 adds teacher/classroom choices; for now: the default set."""
-    return (
-        QuestionSet.objects.filter(
-            game_type=game_type, owner__isnull=True, difficulty=difficulty, operation=operation
-        )
-        .order_by("pk")
-        .first()
+    """Which questions to use (CON-03): the classroom's assigned set that matches the student's
+    choice, else the default set for that level and kind."""
+    matching = QuestionSet.objects.filter(
+        game_type=game_type, difficulty=difficulty, operation=operation
     )
+    if classroom is not None:
+        assigned = (
+            matching.filter(
+                classroom_configs__classroom=classroom, classroom_configs__game_type=game_type
+            )
+            .order_by("pk")
+            .first()
+        )
+        if assigned:
+            return assigned
+    return matching.filter(owner__isnull=True).order_by("pk").first()
+
+
+# ---------------------------------------------------------------------------
+# Teacher library (CON-02): copy a set, then edit the copy.
+# ---------------------------------------------------------------------------
+def visible_sets(teacher, game_type=None):
+    """Defaults + the teacher's own sets."""
+    qs = QuestionSet.objects.filter(Q(owner__isnull=True) | Q(owner=teacher))
+    if game_type is not None:
+        qs = qs.filter(game_type=game_type)
+    return qs.select_related("game_type").order_by(
+        "game_type__order", "difficulty", "operation", "owner_id", "title"
+    )
+
+
+@transaction.atomic
+def copy_question_set(source: QuestionSet, teacher) -> QuestionSet:
+    copy = QuestionSet.objects.create(
+        game_type=source.game_type,
+        owner=teacher,
+        copied_from=source,
+        title=f"{source.title.removeprefix('Default · ')} (my copy)",
+        difficulty=source.difficulty,
+        operation=source.operation,
+        mode=source.mode,
+        generator_params=source.generator_params,
+        question_count=source.question_count,
+    )
+    Question.objects.bulk_create(
+        Question(
+            question_set=copy,
+            operand_a=q.operand_a,
+            operator=q.operator,
+            operand_b=q.operand_b,
+            order=q.order,
+            extra=q.extra,
+        )
+        for q in source.questions.all()
+    )
+    return copy
 
 
 def _a11y_flags(student) -> dict:
@@ -58,7 +107,9 @@ def start_round(
     if plugin is None:
         raise RoundError("This game isn't ready yet.")
 
-    question_set = resolve_question_set(game_type, difficulty, operation)
+    question_set = resolve_question_set(
+        game_type, difficulty, operation, classroom=participant.session.classroom
+    )
     if question_set is not None:
         raw = question_utils.questions_for(question_set)
     else:  # no default set seeded for this combination → generate a fallback round

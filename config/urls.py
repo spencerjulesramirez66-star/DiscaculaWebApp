@@ -7,6 +7,8 @@ urlpatterns = [
     path("admin/", admin.site.urls),  # dev convenience only; product admin panel is Docs-only
     path("accounts/", include("apps.accounts.urls")),
     path("teach/", include("apps.classrooms.urls_teacher")),
+    path("teach/library/", include("apps.games.urls_library")),
+    path("teach/videos/", include("apps.content.urls")),
     path("play/", include("apps.classrooms.urls_student")),
     path("play/", include("apps.games.urls")),
     path("", include("apps.core.urls")),

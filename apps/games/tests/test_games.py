@@ -164,6 +164,10 @@ def test_unknown_question_and_non_number(round_):
 # --- Views -----------------------------------------------------------------------------------
 def test_full_round_through_http(student_client, participant):
     start_url = reverse("games:start", args=[participant.session_id, "fruit_blender"])
+    tutorial_url = reverse("games:tutorial", args=[participant.session_id, "fruit_blender"])
+    # First time: the how-to screen comes first (GAM-09).
+    assert student_client.get(start_url).url == tutorial_url
+    assert student_client.post(tutorial_url).url == start_url
     assert student_client.get(start_url).status_code == 200
     response = student_client.post(start_url, {"difficulty": "medium", "operation": "sub"})
     round_ = GameRound.objects.get()

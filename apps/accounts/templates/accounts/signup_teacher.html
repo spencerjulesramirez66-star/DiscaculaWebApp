@@ -4,7 +4,7 @@
 {% block content %}
 <div class="narrow card stack">
   <h1>{% translate "Teacher sign up" %}</h1>
-  <form method="post" novalidate>
+  <form method="post" data-autosave="signup-teacher" novalidate>
     {% csrf_token %}
     {% translate "Create teacher account" as submit_label %}
     {% include "components/form.html" with form=form submit_label=submit_label %}

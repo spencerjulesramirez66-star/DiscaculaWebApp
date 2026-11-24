@@ -180,3 +180,33 @@ class Attempt(TimeStampedModel):
 
     def __str__(self):
         return f"{self.round_id}/{self.question_key} try {self.try_number}"
+
+
+class ClassroomGameConfig(TimeStampedModel):
+    """Per-classroom choices for one game (CON-03, CON-05).
+
+    `question_sets`: the teacher's sets to use in this class. When a student picks a level and
+    kind (e.g. Easy + Adding), the first assigned set that matches is used; otherwise the default.
+    `video`: tutorial video for this class; empty = the default video.
+    """
+
+    classroom = models.ForeignKey(
+        "classrooms.Classroom", on_delete=models.CASCADE, related_name="game_configs"
+    )
+    game_type = models.ForeignKey(GameType, on_delete=models.CASCADE, related_name="+")
+    question_sets = models.ManyToManyField(
+        QuestionSet, blank=True, related_name="classroom_configs"
+    )
+    video = models.ForeignKey(
+        "content.Video", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["classroom", "game_type"], name="unique_classroom_game_config"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.classroom} · {self.game_type}"

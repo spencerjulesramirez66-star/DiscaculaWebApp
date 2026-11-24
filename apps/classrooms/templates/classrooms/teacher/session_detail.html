@@ -5,6 +5,6 @@
 <p><a href="{% url 'teach:classroom_detail' session.classroom_id %}">← {{ session.classroom.name }}</a></p>
 {# Polls every 5 s; the server answers 286 once the session has ended, which stops polling. #}
 <div class="stack" hx-get="{% url 'teach:session_live' session.pk %}" hx-trigger="every 5s" hx-swap="innerHTML">
-  {% include "classrooms/partials/teacher_live.html" with participants=session.participants.all %}
+  {% include "classrooms/partials/teacher_live.html" %}
 </div>
 {% endblock %}

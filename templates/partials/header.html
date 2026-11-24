@@ -1,10 +1,20 @@
-{% load i18n %}
+{% load i18n avatars %}
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="site-header__brand" href="{% url 'core:home' %}">{{ SITE_NAME }}</a>
-    <nav aria-label="{% translate 'Account' %}">
+    <nav aria-label="{% translate 'Main' %}">
       {% if user.is_authenticated %}
-        <span class="site-header__user">{{ user.display_name }}</span>
+        {% if user.is_teacher and user.email_verified %}
+          <a class="nav-link" href="{% url 'teach:dashboard' %}">{% translate "My classes" %}</a>
+          <a class="nav-link" href="{% url 'library:home' %}">{% translate "Library" %}</a>
+        {% endif %}
+        {% if user.is_student %}
+          <a class="site-header__me" href="{% url 'accounts:avatar' %}?next={{ request.path|urlencode }}" title="{% translate 'Change my character' %}">
+            {% avatar user "sm" %}<span>{{ user.display_name }}</span>
+          </a>
+        {% else %}
+          <span class="site-header__user">{{ user.display_name }}</span>
+        {% endif %}
         <form method="post" action="{% url 'accounts:logout' %}" class="inline">
           {% csrf_token %}
           <button type="submit" class="btn btn--ghost">{% translate "Log out" %}</button>

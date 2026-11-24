@@ -9,6 +9,8 @@ from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import teacher_required
 from apps.accounts.models import User
+from apps.games import monitoring
+from apps.games.models import GameType
 
 from . import services
 from .forms import AddStudentsForm, ClassroomForm
@@ -17,6 +19,8 @@ from .services import NewCredential
 
 # HTMX stops an `every Ns` poll when the server answers with this status code.
 HTMX_STOP_POLLING = 286
+# Rounds shown in full on a student's history page (older ones still count in the summary).
+HISTORY_ROUNDS = 30
 
 
 def _my_classroom(request, pk) -> Classroom:
@@ -96,6 +100,7 @@ def classroom_detail(request, pk):
             "removed": [e for e in enrollments if not e.is_active],
             "open_session": classroom.open_session,
             "add_form": AddStudentsForm(),
+            "games": GameType.objects.filter(is_playable=True),
         },
     )
 
@@ -180,26 +185,54 @@ def session_detail(request, pk):
     return render(
         request,
         "classrooms/teacher/session_detail.html",
-        {"session": session, "extend_choices": services.EXTEND_CHOICES_MINUTES},
+        _live_context(session),
     )
 
 
 @teacher_required
 def session_live(request, pk):
-    """HTMX partial polled every 5 s: status, time left, participants (MON-01 groundwork)."""
+    """HTMX partial polled every 5 s: status, time left, each student's progress (MON-01)."""
     session = _my_session(request, pk)
-    participants = session.participants.select_related("student", "current_game").order_by(
-        "student__full_name"
-    )
     return render(
         request,
         "classrooms/partials/teacher_live.html",
-        {
-            "session": session,
-            "participants": participants,
-            "extend_choices": services.EXTEND_CHOICES_MINUTES,
-        },
+        _live_context(session),
         status=200 if session.is_open else HTMX_STOP_POLLING,
+    )
+
+
+def _live_context(session) -> dict:
+    return {
+        "session": session,
+        "rows": monitoring.live_rows(session),
+        "extend_choices": services.EXTEND_CHOICES_MINUTES,
+    }
+
+
+@teacher_required
+def student_detail(request, pk, student_pk):
+    """MON-02: one student's history in this teacher's classes, newest first."""
+    classroom = _my_classroom(request, pk)
+    enrollment = get_object_or_404(
+        Enrollment.objects.select_related("student__student_profile"),
+        classroom=classroom,
+        student_id=student_pk,
+    )
+    student = enrollment.student
+    rounds = monitoring.student_rounds(student, request.user)
+    details = monitoring.round_details(rounds[:HISTORY_ROUNDS])
+    return render(
+        request,
+        "classrooms/teacher/student_detail.html",
+        {
+            "classroom": classroom,
+            "student": student,
+            "enrollment": enrollment,
+            "summary": monitoring.history_summary(rounds, details),
+            "details": details,
+            "shown": len(details),
+            "struggle_tries": monitoring.STRUGGLE_TRIES,
+        },
     )
 
 

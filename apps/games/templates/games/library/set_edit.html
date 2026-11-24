@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Edit question set" %}{% endblock %}
+{% block content %}
+<p><a href="{% url 'library:home' %}">← {% translate "Library" %}</a></p>
+<div class="card stack narrow-wide">
+  <h1>{% translate "Edit question set" %}</h1>
+  <p class="muted">
+    {{ qset.game_type.name }} · {{ qset.get_difficulty_display }} · {{ qset.get_operation_display }}.
+    {% blocktranslate with max=qset.get_difficulty_display %}Numbers and answers must fit the {{ max }} level; taking away can't go below zero.{% endblocktranslate %}
+  </p>
+  <form method="post" data-autosave="question-set-{{ qset.pk }}" novalidate class="stack">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field{% if field.errors %} field--error{% endif %}">
+        {{ field.label_tag }} {{ field }}
+        {% for e in field.errors %}<small class="field__error">{{ e }}</small>{% endfor %}
+      </div>
+    {% endfor %}
+
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<div class="form-errors" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
+    <table class="table question-table">
+      <thead><tr><th>#</th><th>{% translate "First number" %}</th><th aria-hidden="true"></th><th>{% translate "Second number" %}</th><th>{% translate "Remove" %}</th></tr></thead>
+      <tbody>
+        {% for qform in formset %}
+          <tr{% if qform.errors %} class="row--error"{% endif %}>
+            <td>{{ forloop.counter }}{% for h in qform.hidden_fields %}{{ h }}{% endfor %}</td>
+            <td>{{ qform.operand_a }}</td>
+            <td class="question-table__op" aria-hidden="true">{% if qset.operation == "add" %}+{% else %}−{% endif %}</td>
+            <td>{{ qform.operand_b }}</td>
+            <td>{% if qform.instance.pk %}{{ qform.DELETE }}{% endif %}</td>
+          </tr>
+          {% if qform.errors %}
+            <tr class="row--error"><td></td><td colspan="4">{% for e in qform.non_field_errors %}<small class="field__error">{{ e }}</small> {% endfor %}{% for f in qform %}{% for e in f.errors %}<small class="field__error">{{ e }}</small> {% endfor %}{% endfor %}</td></tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="muted">{% translate "Two empty rows are added each time you save, so you can keep adding questions." %}</p>
+    <button type="submit" class="btn btn--primary btn--block">{% translate "Save question set" %}</button>
+  </form>
+</div>
+{% endblock %}

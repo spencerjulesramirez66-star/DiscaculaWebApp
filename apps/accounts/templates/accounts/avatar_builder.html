@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% translate "Make your character" %}{% endblock %}
+{% block content %}
+{{ state|json_script:"avatar-state" }}
+{# Works without JS (radios + Save). With Alpine, the preview updates as you pick. #}
+<div class="avatar-builder kid" x-data="{ st: JSON.parse(document.getElementById('avatar-state').textContent) }">
+  <h1>{% if first_time %}{% translate "Make your character!" %}{% else %}{% translate "Change your character" %}{% endif %}</h1>
+  <div class="avatar-builder__layout">
+    <div class="avatar-builder__preview card">
+      <span class="avatar avatar--xl" role="img" aria-label="{% translate 'Your character' %}"
+            style="color: {{ initial_color }}" :style="'color:' + (st.colors[st.choices[st.colorKey]] || 'currentColor')">
+        {% for layer in layers %}{% if not layer.is_color %}{% for o in layer.options %}
+          <span class="avatar__layer" {% if not o.selected %}hidden{% endif %}
+                :hidden="st.choices['{{ layer.key }}'] !== '{{ o.id }}'">{{ o.markup }}</span>
+        {% endfor %}{% endif %}{% endfor %}
+      </span>
+    </div>
+
+    <form method="post" class="avatar-builder__form stack">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% for layer in layers %}
+        <fieldset class="avatar-pick">
+          <legend>{{ layer.key|capfirst }}</legend>
+          <div class="avatar-pick__options">
+            {% if layer.optional %}
+              <label class="avatar-pick__option">
+                <input type="radio" name="{{ layer.key }}" value="{{ NONE }}" {% if layer.none_selected %}checked{% endif %} x-model="st.choices['{{ layer.key }}']">
+                <span class="avatar-pick__thumb avatar-pick__thumb--none" aria-hidden="true">✕</span>
+                <span>{% translate "None" %}</span>
+              </label>
+            {% endif %}
+            {% for o in layer.options %}
+              <label class="avatar-pick__option">
+                <input type="radio" name="{{ layer.key }}" value="{{ o.id }}" {% if o.selected %}checked{% endif %} x-model="st.choices['{{ layer.key }}']">
+                {% if layer.is_color %}
+                  <span class="avatar-pick__thumb avatar-pick__swatch" style="background: {{ o.value }}" aria-hidden="true"></span>
+                {% else %}
+                  <span class="avatar-pick__thumb" aria-hidden="true">{{ o.markup }}</span>
+                {% endif %}
+                <span>{{ o.label }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </fieldset>
+      {% endfor %}
+      <button type="submit" class="btn btn--primary btn--lg btn--block">{% translate "Save my character" %}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

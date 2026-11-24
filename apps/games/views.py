@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from apps.accounts.decorators import student_required
 from apps.classrooms import services as classroom_services
 from apps.classrooms.models import SessionParticipant
+from apps.content import services as content_services
 
 from . import services
 from .forms import StartRoundForm
@@ -32,14 +33,45 @@ def _my_round(request, pk) -> GameRound:
     )
 
 
-@student_required
-def game_start(request, session_pk, key):
+def _open_game(request, session_pk, key):
     participant = _participant(request, session_pk)
-    if not participant.session.is_open:
-        return redirect("play:session", pk=session_pk)
     game = services.playable_game(key)
     if game is None:
         raise Http404("Game not available.")
+    return participant, game
+
+
+@student_required
+def game_tutorial(request, session_pk, key):
+    """GAM-09: how-to video. First time: must reach the end (or press Done if it can't play)."""
+    participant, game = _open_game(request, session_pk, key)
+    if not participant.session.is_open:
+        return redirect("play:session", pk=session_pk)
+    video = content_services.tutorial_video(game, participant.session.classroom)
+    if request.method == "POST":
+        content_services.mark_watched(request.user, game, video)
+        return redirect("games:start", session_pk=session_pk, key=key)
+    first_time = content_services.needs_tutorial(request.user, game)
+    return render(
+        request,
+        "games/tutorial.html",
+        {
+            "game": game,
+            "session": participant.session,
+            "video": video if content_services.video_is_playable(video) else None,
+            "first_time": first_time,
+            "a11y": getattr(request.user, "student_profile", None),
+        },
+    )
+
+
+@student_required
+def game_start(request, session_pk, key):
+    participant, game = _open_game(request, session_pk, key)
+    if not participant.session.is_open:
+        return redirect("play:session", pk=session_pk)
+    if content_services.needs_tutorial(request.user, game):
+        return redirect("games:tutorial", session_pk=session_pk, key=key)
     form = StartRoundForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         try:

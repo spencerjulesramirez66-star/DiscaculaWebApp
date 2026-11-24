@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{{ game.name }} · {{ classroom.name }}{% endblock %}
+{% block content %}
+<p><a href="{% url 'teach:classroom_detail' classroom.pk %}">← {{ classroom.name }}</a></p>
+<div class="card stack narrow">
+  <h1>{% blocktranslate with game=game.name %}{{ game }} settings{% endblocktranslate %}</h1>
+  <p class="muted">{% blocktranslate with c=classroom.name %}Only for {{ c }}.{% endblocktranslate %}</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if not form.fields.question_sets.queryset.exists %}
+      <p class="banner">{% translate "You have no question sets for this game yet." %} <a href="{% url 'library:home' %}">{% translate "Copy one in the Library" %}</a></p>
+    {% endif %}
+    {% translate "Save settings" as submit_label %}
+    {% include "components/form.html" with form=form submit_label=submit_label %}
+  </form>
+</div>
+{% endblock %}
