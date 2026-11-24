@@ -22,6 +22,9 @@ SITE_NAME = "Web App for Dyscalculia"
 SECRET_KEY = env("SECRET_KEY", default="")  # required; prod.py refuses to start without it
 DEBUG = env.bool("DEBUG", default=False)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+# The app's base address (room-code screen, login cards). Change in .env when it moves.
+SITE_URL = env("SITE_URL", default="http://127.0.0.1:8000").rstrip("/")
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 DJANGO_APPS = [
     "django.contrib.admin",

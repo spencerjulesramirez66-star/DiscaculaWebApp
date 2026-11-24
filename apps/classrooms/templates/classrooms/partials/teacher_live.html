@@ -3,6 +3,7 @@
   <section class="room-code card" aria-label="{% translate 'Room code' %}">
     <p class="room-code__label">{% translate "Room code" %}</p>
     <p class="room-code__value">{{ session.code }}</p>
+    <p class="room-code__where">{% translate "Students go to" %} <strong>{{ PLAY_URL }}</strong></p>
     <p class="muted">{% blocktranslate count m=session.minutes_left %}{{ m }} minute left{% plural %}{{ m }} minutes left{% endblocktranslate %}</p>
   </section>
   {% if session.in_warning_window %}
