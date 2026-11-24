@@ -9,7 +9,7 @@
   <form method="post" novalidate>
     {% csrf_token %}
     {% if not form.fields.question_sets.queryset.exists %}
-      <p class="banner">{% translate "You have no question sets for this game yet." %} <a href="{% url 'library:home' %}">{% translate "Copy one in the Library" %}</a></p>
+      <p class="banner">{% translate "You don't have your own questions for this game yet." %} <a href="{% url 'library:home' %}">{% translate "Make some in My materials" %}</a></p>
     {% endif %}
     {% translate "Save settings" as submit_label %}
     {% include "components/form.html" with form=form submit_label=submit_label %}

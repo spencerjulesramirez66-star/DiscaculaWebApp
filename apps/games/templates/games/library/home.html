@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% translate "Library" %}{% endblock %}
+{% block title %}{% translate "My materials" %}{% endblock %}
 {% block content %}
 <div class="page-head">
   <div>
-    <h1>{% translate "Library" %}</h1>
-    <p class="muted">{% translate "Copy a default question set to make your own, then choose it in a class's game settings." %}</p>
+    <h1>{% translate "My materials" %}</h1>
+    <p class="muted">{% translate "Make your own copy of the ready-made questions, change them, then pick them for a class." %}</p>
   </div>
   <a class="btn btn--primary" href="{% url 'videos:upload' %}">{% translate "Upload a video" %}</a>
 </div>
 
 <section class="card stack" aria-labelledby="my-sets-h">
-  <h2 id="my-sets-h">{% translate "My question sets" %}</h2>
+  <h2 id="my-sets-h">{% translate "My question lists" %}</h2>
   {% if my_sets %}
     <div class="table-wrap">
       <table class="table">
-        <thead><tr><th>{% translate "Title" %}</th><th>{% translate "Game" %}</th><th>{% translate "Level" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Questions" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
+        <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Game" %}</th><th>{% translate "Level" %}</th><th>{% translate "Type" %}</th><th>{% translate "Questions" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
         <tbody>
           {% for s in my_sets %}
             <tr>
               <td>{{ s.title }}</td><td>{{ s.game_type.name }}</td><td>{{ s.get_difficulty_display }}</td><td>{{ s.get_operation_display }}</td><td>{{ s.question_count }}</td>
               <td class="table__actions">
                 <a class="btn btn--small btn--secondary" href="{% url 'library:set_edit' s.pk %}">{% translate "Edit" %}</a>
-                <form method="post" action="{% url 'library:set_delete' s.pk %}" class="inline" data-confirm="{% translate 'Delete this question set?' %}">
+                <form method="post" action="{% url 'library:set_delete' s.pk %}" class="inline" data-confirm="{% translate 'Delete this question list?' %}">
                   {% csrf_token %}<button type="submit" class="btn btn--small btn--ghost">{% translate "Delete" %}</button>
                 </form>
               </td>
@@ -32,22 +32,22 @@
       </table>
     </div>
   {% else %}
-    <p class="muted">{% translate "None yet. Copy a default set below to start." %}</p>
+    <p class="muted">{% translate "None yet. Make your own copy of a ready-made list below." %}</p>
   {% endif %}
 </section>
 
 <section class="card stack" aria-labelledby="default-sets-h">
-  <h2 id="default-sets-h">{% translate "Default question sets" %}</h2>
+  <h2 id="default-sets-h">{% translate "Ready-made question lists" %}</h2>
   <div class="table-wrap">
     <table class="table">
-      <thead><tr><th>{% translate "Title" %}</th><th>{% translate "Game" %}</th><th>{% translate "Questions" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
+      <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Game" %}</th><th>{% translate "Questions" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
       <tbody>
         {% for s in default_sets %}
           <tr>
             <td><a href="{% url 'library:set_view' s.pk %}">{{ s.title }}</a></td><td>{{ s.game_type.name }}</td><td>{{ s.question_count }}</td>
             <td class="table__actions">
               <form method="post" action="{% url 'library:set_copy' s.pk %}" class="inline">
-                {% csrf_token %}<button type="submit" class="btn btn--small btn--secondary">{% translate "Copy & edit" %}</button>
+                {% csrf_token %}<button type="submit" class="btn btn--small btn--secondary">{% translate "Make my own copy" %}</button>
               </form>
             </td>
           </tr>
@@ -58,14 +58,14 @@
 </section>
 
 <section class="card stack" aria-labelledby="videos-h">
-  <h2 id="videos-h">{% translate "Tutorial videos" %}</h2>
+  <h2 id="videos-h">{% translate "How-to videos" %}</h2>
   <div class="table-wrap">
     <table class="table">
-      <thead><tr><th>{% translate "Title" %}</th><th>{% translate "Game" %}</th><th>{% translate "Captions" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
+      <thead><tr><th>{% translate "Name" %}</th><th>{% translate "Game" %}</th><th>{% translate "Subtitles" %}</th><th><span class="sr-only">{% translate "Actions" %}</span></th></tr></thead>
       <tbody>
         {% for v in videos %}
           <tr>
-            <td><a href="{% url 'videos:view' v.pk %}">{{ v.title }}</a>{% if v.is_default %} <span class="badge">{% translate "Default" %}</span>{% endif %}</td>
+            <td><a href="{% url 'videos:view' v.pk %}">{{ v.title }}</a>{% if v.is_default %} <span class="badge">{% translate "Ready-made" %}</span>{% endif %}</td>
             <td>{{ v.game_type.name }}</td>
             <td>{% if v.captions_url %}{% translate "Yes" %}{% else %}—{% endif %}</td>
             <td class="table__actions">

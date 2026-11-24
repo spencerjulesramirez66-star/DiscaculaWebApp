@@ -6,7 +6,7 @@
       {% if user.is_authenticated %}
         {% if user.is_teacher and user.email_verified %}
           <a class="nav-link" href="{% url 'teach:dashboard' %}">{% translate "My classes" %}</a>
-          <a class="nav-link" href="{% url 'library:home' %}">{% translate "Library" %}</a>
+          <a class="nav-link" href="{% url 'library:home' %}">{% translate "My materials" %}</a>
         {% endif %}
         {% if user.is_student %}
           <a class="site-header__me" href="{% url 'accounts:avatar' %}?next={{ request.path|urlencode }}" title="{% translate 'Change my character' %}">

@@ -48,7 +48,7 @@ def test_copy_makes_an_owned_editable_copy(teacher, easy_add):
     copy = services.copy_question_set(easy_add, teacher)
     assert copy.owner == teacher and copy.copied_from == easy_add
     assert copy.questions.count() == easy_add.questions.count()
-    assert "(my copy)" in copy.title and not copy.title.startswith("Default")
+    assert copy.title == "Easy adding – my version"
 
 
 def test_copy_and_edit_through_views(teacher_client, teacher, easy_add):
@@ -120,7 +120,7 @@ def test_defaults_and_other_teachers_sets_are_not_editable(
 def test_library_home_lists_defaults_and_mine(teacher_client, teacher, easy_add):
     services.copy_question_set(easy_add, teacher)
     html = teacher_client.get(reverse("library:home")).content.decode()
-    assert "Default · Easy adding" in html and "(my copy)" in html
+    assert "Easy adding" in html and "my version" in html
     assert "How to play Fruit Blender" in html  # seeded default video
 
 

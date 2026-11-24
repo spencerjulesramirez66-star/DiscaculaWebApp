@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% translate "Live session" %} · {{ session.classroom.name }}{% endblock %}
+{% block title %}{% translate "Class time" %} · {{ session.classroom.name }}{% endblock %}
 {% block content %}
 <p><a href="{% url 'teach:classroom_detail' session.classroom_id %}">← {{ session.classroom.name }}</a></p>
 {# Polls every 5 s; the server answers 286 once the session has ended, which stops polling. #}

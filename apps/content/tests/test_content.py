@@ -105,8 +105,8 @@ def test_upload_video_with_captions(teacher_client, teacher, fruit_blender):
 @pytest.mark.parametrize(
     ("upload", "error"),
     [
-        ({"file": SimpleUploadedFile("a.avi", b"x", content_type="video/x-msvideo")}, ".mp4"),
-        ({"file": _mp4(), "captions": _vtt(b"not a vtt")}, "WebVTT"),
+        ({"file": SimpleUploadedFile("a.avi", b"x", content_type="video/x-msvideo")}, "MP4"),
+        ({"file": _mp4(), "captions": _vtt(b"not a vtt")}, "doesn"),
         ({"file": _mp4(), "captions": _vtt(name="c.srt")}, ".vtt"),
     ],
 )

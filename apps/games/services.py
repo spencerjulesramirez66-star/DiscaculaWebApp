@@ -4,7 +4,7 @@ import random
 from dataclasses import dataclass
 
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Case, Q, Value, When
 from django.utils import timezone
 
 from apps.classrooms.models import SessionParticipant
@@ -54,8 +54,16 @@ def visible_sets(teacher, game_type=None):
     qs = QuestionSet.objects.filter(Q(owner__isnull=True) | Q(owner=teacher))
     if game_type is not None:
         qs = qs.filter(game_type=game_type)
-    return qs.select_related("game_type").order_by(
-        "game_type__order", "difficulty", "operation", "owner_id", "title"
+    # Easy → Medium → Hard (not alphabetical), adding before taking away.
+    level_order = Case(
+        When(difficulty="easy", then=Value(0)),
+        When(difficulty="medium", then=Value(1)),
+        default=Value(2),
+    )
+    return (
+        qs.select_related("game_type")
+        .annotate(level_order=level_order)
+        .order_by("game_type__order", "level_order", "operation", "owner_id", "title")
     )
 
 
@@ -65,7 +73,7 @@ def copy_question_set(source: QuestionSet, teacher) -> QuestionSet:
         game_type=source.game_type,
         owner=teacher,
         copied_from=source,
-        title=f"{source.title.removeprefix('Default · ')} (my copy)",
+        title=f"{source.title} – my version",
         difficulty=source.difficulty,
         operation=source.operation,
         mode=source.mode,

@@ -1,7 +1,4 @@
 from django.conf import settings
-from django.urls import reverse
-
-from .utils import absolute_url
 
 # StudentProfile field → class on <body> (styles in static/css/a11y.css).
 A11Y_CLASSES = {
@@ -21,8 +18,6 @@ def site(request):
     """
     context = {
         "SITE_NAME": settings.SITE_NAME,
-        # Where students go to type a room code, as a full address (see SITE_URL in .env).
-        "PLAY_URL": absolute_url(request, reverse("play:join")),
         "a11y_classes": "",
         "a11y": None,
     }

@@ -2,9 +2,9 @@
 {% load i18n %}
 {% block title %}{% translate "Upload a video" %}{% endblock %}
 {% block content %}
-<p><a href="{% url 'library:home' %}">← {% translate "Library" %}</a></p>
+<p><a href="{% url 'library:home' %}">← {% translate "My materials" %}</a></p>
 <div class="card stack narrow">
-  <h1>{% translate "Upload a tutorial video" %}</h1>
+  <h1>{% translate "Upload a how-to video" %}</h1>
   <form method="post" enctype="multipart/form-data" data-autosave="video-upload" novalidate>
     {% csrf_token %}
     {% translate "Upload video" as submit_label %}

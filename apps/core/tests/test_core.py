@@ -38,30 +38,3 @@ def test_asset_url():
     assert asset_url("games/fruit_blender", "sprites/fruits/apple.svg").endswith(
         "assets/games/fruit_blender/sprites/fruits/apple.svg"
     )
-
-
-@pytest.mark.django_db
-def test_play_url_uses_site_url_when_set(client):
-    with override_settings(SITE_URL="http://192.168.1.20:8000"):
-        html = client.get(reverse("core:home")).content.decode()
-    from apps.core.utils import absolute_url
-
-    class Req:
-        def build_absolute_uri(self, path):
-            return "http://testserver" + path
-
-    with override_settings(SITE_URL=""):
-        assert absolute_url(Req(), "/play/") == "http://testserver/play/"
-    with override_settings(SITE_URL="http://192.168.1.20:8000"):
-        assert absolute_url(Req(), "/play/") == "http://192.168.1.20:8000/play/"
-    assert html  # home renders with the setting
-
-
-@pytest.mark.django_db
-def test_room_code_screen_shows_student_address(teacher_client, classroom):
-    from apps.classrooms import services
-
-    session = services.start_session(classroom)
-    with override_settings(SITE_URL="http://192.168.1.20:8000"):
-        html = teacher_client.get(reverse("teach:session_detail", args=[session.pk])).content
-    assert "http://192.168.1.20:8000/play/" in html.decode()

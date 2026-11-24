@@ -139,8 +139,19 @@ def round_result(request, pk):
     if not round_.is_complete:
         return redirect("games:round", pk=round_.pk)
     session_open = round_.session is not None and classroom_services.refresh(round_.session).is_open
+    # Children see "4 out of 5" and stars, not a percentage (teachers still see %).
+    total = len(round_.questions)
+    right = round_.attempts.filter(try_number=1, is_correct=True).count()
+    stars = max(1, round(5 * right / total)) if total else 1  # always at least one star
     return render(
         request,
         "games/result.html",
-        {"round": round_, "session_open": session_open},
+        {
+            "round": round_,
+            "session_open": session_open,
+            "right": right,
+            "total": total,
+            "stars": [i < stars for i in range(5)],
+            "star_count": stars,
+        },
     )

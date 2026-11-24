@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% translate "Session ended" %}{% endblock %}
+{% block title %}{% translate "Class time is over" %}{% endblock %}
 {% block content %}
 <div class="narrow card stack kid center">
   <h1>{% translate "Great job today!" %}</h1>
-  <p class="lead">{% translate "This session has ended." %}</p>
+  <p class="lead">{% translate "Class time is over." %}</p>
   <a class="btn btn--primary btn--lg" href="{% url 'play:join' %}">{% translate "Enter a new code" %}</a>
 </div>
 {% endblock %}

@@ -11,11 +11,11 @@
   <div class="actions">
     <a class="btn btn--secondary" href="{% url 'teach:classroom_edit' classroom.pk %}">{% translate "Edit class" %}</a>
     {% if open_session %}
-      <a class="btn btn--primary" href="{% url 'teach:session_detail' open_session.pk %}">{% translate "Open live session" %}</a>
+      <a class="btn btn--primary" href="{% url 'teach:session_detail' open_session.pk %}">{% translate "Open class time" %}</a>
     {% else %}
       <form method="post" action="{% url 'teach:session_start' classroom.pk %}" class="inline">
         {% csrf_token %}
-        <button type="submit" class="btn btn--primary">{% translate "Start a session" %}</button>
+        <button type="submit" class="btn btn--primary">{% translate "Start class time" %}</button>
       </form>
     {% endif %}
   </div>
@@ -47,7 +47,7 @@
         </table>
       </div>
     {% else %}
-      <p class="muted">{% translate "No students yet. Add them here, or start a session and let students join with the room code." %}</p>
+      <p class="muted">{% translate "No students yet. Add them here, or start class time and let them join with the room code." %}</p>
     {% endif %}
     {% if removed %}
       <details>
@@ -72,12 +72,12 @@
       {% translate "Create accounts" as submit_label %}
       {% include "components/form.html" with form=add_form submit_label=submit_label %}
     </form>
-    <p class="muted">{% translate "Students who already have an account can join with the room code instead." %}</p>
+    <p class="muted">{% translate "Students who already have an account just type the room code." %}</p>
   </section>
 
   <section class="card stack" aria-labelledby="games-h">
     <h2 id="games-h">{% translate "Games" %}</h2>
-    <p class="muted">{% translate "Choose your own question sets and tutorial video for this class." %}</p>
+    <p class="muted">{% translate "Choose which questions and how-to video this class uses." %}</p>
     <ul class="plain-list">
       {% for g in games %}
         <li><a href="{% url 'library:class_game' classroom.pk g.key %}">{% blocktranslate with game=g.name %}{{ game }} settings{% endblocktranslate %}</a></li>

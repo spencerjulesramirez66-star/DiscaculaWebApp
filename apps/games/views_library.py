@@ -35,7 +35,7 @@ def library_home(request):
 def set_copy(request, pk):
     source = get_object_or_404(services.visible_sets(request.user), pk=pk)
     copy = services.copy_question_set(source, request.user)
-    messages.success(request, _("Copied. Change the questions below, then save."))
+    messages.success(request, _("Your copy is ready. Change the questions, then press Save."))
     return redirect("library:set_edit", pk=copy.pk)
 
 
@@ -60,7 +60,7 @@ def set_edit(request, pk):
                 order += 1
             qset.question_count = qset.questions.count()
             qset.save(update_fields=["question_count", "updated_at"])
-        messages.success(request, _("Question set saved."))
+        messages.success(request, _("Questions saved."))
         return redirect("library:home")
     return render(
         request, "games/library/set_edit.html", {"qset": qset, "form": form, "formset": formset}
@@ -79,7 +79,7 @@ def set_view(request, pk):
 def set_delete(request, pk):
     qset = get_object_or_404(QuestionSet, pk=pk, owner=request.user)
     qset.delete()
-    messages.success(request, _("Question set deleted."))
+    messages.success(request, _("Question list deleted."))
     return redirect("library:home")
 
 

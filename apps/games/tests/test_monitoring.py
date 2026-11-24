@@ -95,7 +95,7 @@ def test_live_view_keeps_final_results_after_end(teacher_client, session, studen
     response = teacher_client.get(reverse("teach:session_live", args=[session.pk]))
     assert response.status_code == 286
     html = response.content.decode()
-    assert "Final results" in html and "Finished" in html
+    assert "how everyone did" in html and "Done" in html
 
 
 # --- History ------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ def test_student_detail_page(teacher_client, session, student, fruit_blender):
     url = reverse("teach:student_detail", args=[session.classroom_id, student.pk])
     html = teacher_client.get(url).content.decode()
     assert student.full_name in html
-    assert "Unfinished · 1/5" in html
+    assert "Not finished · 1 of 5" in html
     assert "answer--wrong" in html and "Needed extra help" in html
 
 

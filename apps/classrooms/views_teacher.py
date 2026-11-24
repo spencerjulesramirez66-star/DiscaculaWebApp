@@ -83,7 +83,7 @@ def classroom_archive(request, pk):
         services.end_session(session)
     classroom.is_archived = True
     classroom.save(update_fields=["is_archived", "updated_at"])
-    messages.success(request, _("Class archived."))
+    messages.success(request, _("Class removed."))
     return redirect("teach:dashboard")
 
 
@@ -260,7 +260,7 @@ def session_extend(request, pk):
     except ValueError as exc:
         messages.error(request, str(exc))
     else:
-        messages.success(request, _("Session extended by %(m)s minutes.") % {"m": minutes})
+        messages.success(request, _("Added %(m)s more minutes.") % {"m": minutes})
     return redirect("teach:session_detail", pk=session.pk)
 
 
@@ -269,5 +269,5 @@ def session_extend(request, pk):
 def session_end(request, pk):
     session = _my_session(request, pk)
     services.end_session(session)
-    messages.success(request, _("Session ended. The room code no longer works."))
+    messages.success(request, _("Class time ended."))
     return redirect("teach:classroom_detail", pk=session.classroom_id)

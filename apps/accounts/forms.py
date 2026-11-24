@@ -80,7 +80,7 @@ class StudentSignupForm(_PasswordPairMixin):
         label=_("Username"),
         max_length=150,
         validators=[username_validator],
-        help_text=_("What you'll type to log in. Letters, numbers, dots and dashes."),
+        help_text=_("The name you type to log in, like maria2. No spaces."),
         widget=forms.TextInput(attrs={"autocomplete": "username", "autocapitalize": "none"}),
     )
     email = forms.EmailField(
@@ -135,15 +135,15 @@ class AccessibilityForm(forms.ModelForm):
             "high_contrast": _("High contrast"),
             "large_text": _("Large text and buttons"),
             "reduced_motion": _("Reduce motion"),
-            "captions": _("Captions on videos"),
-            "narration": _("Read questions aloud (early version)"),
-            "keyboard_mode": _("Keyboard play hints"),
+            "captions": _("Subtitles on videos"),
+            "narration": _("Read questions out loud"),
+            "keyboard_mode": _("Keyboard help"),
         }
         help_texts = {
-            "high_contrast": _("White and yellow on black. For low vision."),
+            "high_contrast": _("White and yellow on black. Easier to see."),
             "large_text": _("Bigger letters, numbers and tap targets."),
-            "reduced_motion": _("Turns off animations, the loading screen and video autoplay."),
-            "captions": _("Turns captions on by default. For deaf or hard-of-hearing students."),
-            "narration": _("Uses the device's built-in voice. Quality depends on the device."),
-            "keyboard_mode": _("Strong focus outline and tips for playing with Tab and Enter."),
+            "reduced_motion": _("Stops moving pictures and animations."),
+            "captions": _("Shows words on the how-to video. Helps students who can't hear well."),
+            "narration": _("The computer reads each question out loud."),
+            "keyboard_mode": _("Shows tips for playing with the keyboard instead of a mouse."),
         }

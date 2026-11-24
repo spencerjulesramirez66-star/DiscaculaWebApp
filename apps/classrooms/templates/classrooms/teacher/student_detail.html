@@ -22,25 +22,25 @@
           {% if p.high_contrast %}<span class="badge">{% translate "High contrast" %}</span>{% endif %}
           {% if p.large_text %}<span class="badge">{% translate "Large text" %}</span>{% endif %}
           {% if p.reduced_motion %}<span class="badge">{% translate "Less motion" %}</span>{% endif %}
-          {% if p.captions %}<span class="badge">{% translate "Captions" %}</span>{% endif %}
+          {% if p.captions %}<span class="badge">{% translate "Subtitles" %}</span>{% endif %}
           {% if p.narration %}<span class="badge">{% translate "Read aloud" %}</span>{% endif %}
           {% if p.keyboard_mode %}<span class="badge">{% translate "Keyboard" %}</span>{% endif %}
-        {% else %}{% translate "Standard settings. Open to change." %}{% endif %}
+        {% else %}{% translate "No changes yet. Click to set." %}{% endif %}
       {% endwith %}
     </span>
   </summary>
   <form method="post" class="a11y-settings__form">
     {% csrf_token %}
-    <p class="muted">{% translate "Applied the next time this student opens a page, on any device they log in to." %}</p>
+    <p class="muted">{% translate "Changes show up the next time this student opens a page." %}</p>
     {% translate "Save accessibility settings" as submit_label %}
     {% include "components/form.html" with form=a11y_form submit_label=submit_label %}
   </form>
 </details>
 
 <section class="stat-grid" aria-label="{% translate 'Summary' %}">
-  <div class="stat card"><span class="stat__value">{{ summary.rounds_played }}</span><span class="stat__label">{% translate "Rounds played" %}</span></div>
-  <div class="stat card"><span class="stat__value">{{ summary.rounds_finished }}</span><span class="stat__label">{% translate "Rounds finished" %}</span></div>
-  <div class="stat card"><span class="stat__value">{% if summary.avg_score is not None %}{{ summary.avg_score }}%{% else %}—{% endif %}</span><span class="stat__label">{% translate "Average first-try score" %}</span></div>
+  <div class="stat card"><span class="stat__value">{{ summary.rounds_played }}</span><span class="stat__label">{% translate "Games played" %}</span></div>
+  <div class="stat card"><span class="stat__value">{{ summary.rounds_finished }}</span><span class="stat__label">{% translate "Games finished" %}</span></div>
+  <div class="stat card"><span class="stat__value">{% if summary.avg_score is not None %}{{ summary.avg_score }}%{% else %}—{% endif %}</span><span class="stat__label">{% translate "Right first time (average)" %}</span></div>
   <div class="stat card"><span class="stat__value">{% if summary.avg_seconds_per_question is not None %}{{ summary.avg_seconds_per_question }} s{% else %}—{% endif %}</span><span class="stat__label">{% translate "Average time per question" %}</span></div>
 </section>
 
@@ -49,7 +49,7 @@
     <h2 id="levels-h">{% translate "By level" %}</h2>
     {% if summary.by_level %}
       <table class="table">
-        <thead><tr><th>{% translate "Game" %}</th><th>{% translate "Level" %}</th><th>{% translate "Kind" %}</th><th>{% translate "Rounds" %}</th><th>{% translate "Average" %}</th></tr></thead>
+        <thead><tr><th>{% translate "Game" %}</th><th>{% translate "Level" %}</th><th>{% translate "Type" %}</th><th>{% translate "Games" %}</th><th>{% translate "Right first time" %}</th></tr></thead>
         <tbody>
           {% for row in summary.by_level %}
             <tr><td>{{ row.game_type__name }}</td><td>{{ row.level }}</td><td>{{ row.kind }}</td><td>{{ row.rounds }}</td><td>{{ row.avg }}%</td></tr>
@@ -57,7 +57,7 @@
         </tbody>
       </table>
     {% else %}
-      <p class="muted">{% translate "No finished rounds yet." %}</p>
+      <p class="muted">{% translate "No finished games yet." %}</p>
     {% endif %}
   </section>
   <section class="card stack" aria-labelledby="struggle-h">
@@ -72,9 +72,9 @@
 </div>
 
 <section class="card stack history" aria-labelledby="rounds-h">
-  <h2 id="rounds-h">{% translate "Rounds" %}</h2>
+  <h2 id="rounds-h">{% translate "Games" %}</h2>
   {% if details %}
-    {% if summary.rounds_played > shown %}<p class="muted">{% blocktranslate %}Showing the latest {{ shown }} rounds.{% endblocktranslate %}</p>{% endif %}
+    {% if summary.rounds_played > shown %}<p class="muted">{% blocktranslate %}Showing the latest {{ shown }} games.{% endblocktranslate %}</p>{% endif %}
     {% for d in details %}
       <details class="history__round">
         <summary>
@@ -82,7 +82,7 @@
           <span>{{ d.round.game_type.name }} · {{ d.round.get_difficulty_display }} {{ d.round.get_operation_display|lower }}</span>
           <span class="history__score">
             {% if d.round.is_complete %}<strong>{{ d.round.score_percent }}%</strong>
-            {% else %}<span class="badge">{% blocktranslate with a=d.progress.answered t=d.progress.total %}Unfinished · {{ a }}/{{ t }}{% endblocktranslate %}</span>{% endif %}
+            {% else %}<span class="badge">{% blocktranslate with a=d.progress.answered t=d.progress.total %}Not finished · {{ a }} of {{ t }}{% endblocktranslate %}</span>{% endif %}
           </span>
         </summary>
         <p class="muted">{{ d.round.session.classroom.name }}</p>
@@ -95,7 +95,7 @@
                 <td>
                   {% for t in q.tries %}<span class="answer {% if t.is_correct %}answer--right{% else %}answer--wrong{% endif %}">{{ t.answer_given }}</span>{% empty %}<span class="muted">{% translate "not reached" %}</span>{% endfor %}
                 </td>
-                <td>{% if q.tries %}{{ q.tries|length }}{% if q.right_first_time %} <span class="badge badge--live">{% translate "first try" %}</span>{% endif %}{% else %}—{% endif %}</td>
+                <td>{% if q.tries %}{{ q.tries|length }}{% if q.right_first_time %} <span class="badge badge--live">{% translate "first time" %}</span>{% endif %}{% else %}—{% endif %}</td>
                 <td>{% if q.seconds is not None %}{{ q.seconds }} s{% else %}—{% endif %}</td>
               </tr>
             {% endfor %}

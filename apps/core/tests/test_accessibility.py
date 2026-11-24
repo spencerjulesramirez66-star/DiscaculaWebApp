@@ -76,14 +76,14 @@ def test_teacher_saves_profile(teacher_client, classroom, student):
     Enrollment.objects.create(classroom=classroom, student=student)
     url = reverse("teach:student_detail", args=[classroom.pk, student.pk])
     page = teacher_client.get(url).content.decode()
-    assert "Accessibility" in page and "Standard settings" in page
+    assert "Accessibility" in page and "No changes yet" in page
     response = teacher_client.post(url, {"high_contrast": "on", "captions": "on"})
     assert response.url == url
     student.student_profile.refresh_from_db()
     p = student.student_profile
     assert (p.high_contrast, p.captions, p.large_text) == (True, True, False)
     page = teacher_client.get(url).content.decode()
-    assert "High contrast" in page and "Standard settings" not in page
+    assert "High contrast" in page and "No changes yet" not in page
 
 
 def test_unticking_turns_settings_off(teacher_client, classroom, student):

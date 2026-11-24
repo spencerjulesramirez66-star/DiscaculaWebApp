@@ -3,25 +3,24 @@
   <section class="room-code card" aria-label="{% translate 'Room code' %}">
     <p class="room-code__label">{% translate "Room code" %}</p>
     <p class="room-code__value">{{ session.code }}</p>
-    <p class="room-code__where">{% translate "Students go to" %} <strong>{{ PLAY_URL }}</strong></p>
     <p class="muted">{% blocktranslate count m=session.minutes_left %}{{ m }} minute left{% plural %}{{ m }} minutes left{% endblocktranslate %}</p>
   </section>
   {% if session.in_warning_window %}
-    <div class="banner banner--warning" role="status">{% translate "This session ends in less than 5 minutes. Extend it if your class needs more time." %}</div>
+    <div class="banner banner--warning" role="status">{% translate "Class time ends in less than 5 minutes. Add more time if you need it." %}</div>
   {% endif %}
   <div class="actions">
     {% for m in extend_choices %}
       <form method="post" action="{% url 'teach:session_extend' session.pk %}" class="inline">
         {% csrf_token %}<input type="hidden" name="minutes" value="{{ m }}">
-        <button type="submit" class="btn btn--secondary">{% blocktranslate %}Extend {{ m }} min{% endblocktranslate %}</button>
+        <button type="submit" class="btn btn--secondary">{% blocktranslate %}Add {{ m }} minutes{% endblocktranslate %}</button>
       </form>
     {% endfor %}
-    <form method="post" action="{% url 'teach:session_end' session.pk %}" class="inline" data-confirm="{% translate 'End the session for everyone?' %}">
-      {% csrf_token %}<button type="submit" class="btn btn--danger">{% translate "End session" %}</button>
+    <form method="post" action="{% url 'teach:session_end' session.pk %}" class="inline" data-confirm="{% translate 'End class time for everyone?' %}">
+      {% csrf_token %}<button type="submit" class="btn btn--danger">{% translate "End class time" %}</button>
     </form>
   </div>
 {% else %}
-  <div class="banner" role="status">{% translate "This session has ended. The room code no longer works. Final results are below." %}</div>
+  <div class="banner" role="status">{% translate "Class time has ended. Here is how everyone did." %}</div>
 {% endif %}
 
 <section class="card stack">
@@ -32,12 +31,10 @@
         <thead>
           <tr>
             <th>{% translate "Name" %}</th>
-            <th>{% translate "Now playing" %}</th>
+            <th>{% translate "Playing" %}</th>
             <th>{% translate "Progress" %}</th>
-            <th><abbr title="{% translate 'Right on the first try, out of the questions answered so far' %}">{% translate "First-try %" %}</abbr></th>
-            <th>{% translate "Retries" %}</th>
-            <th>{% translate "Rounds done" %}</th>
-            <th>{% translate "Status" %}</th>
+            <th>{% translate "Right first time" %}</th>
+            <th>{% translate "Here?" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -50,7 +47,7 @@
               </td>
               <td>
                 {% if c %}
-                  {% if c.round.is_complete %}<span class="badge badge--live">{% translate "Finished" %}</span>
+                  {% if c.round.is_complete %}<span class="badge badge--live">{% translate "Done" %}</span>
                   {% else %}
                     <span class="progress" role="img" aria-label="{% blocktranslate with a=c.answered t=c.total %}{{ a }} of {{ t }} questions{% endblocktranslate %}"><span class="progress__bar" style="width: {{ c.percent_done }}%"></span></span>
                     <span class="muted">{{ c.answered }}/{{ c.total }}</span>
@@ -58,16 +55,14 @@
                 {% else %}—{% endif %}
               </td>
               <td>{% if c and c.score_so_far is not None %}<strong>{{ c.score_so_far }}%</strong>{% else %}—{% endif %}</td>
-              <td>{% if c %}{{ c.retries }}{% else %}—{% endif %}</td>
-              <td>{{ row.rounds_done }}{% if row.avg_score is not None %} <span class="muted">· {% translate "avg" %} {{ row.avg_score }}%</span>{% endif %}</td>
-              <td>{% if p.is_online and session.is_open %}<span class="badge badge--live">{% translate "Here" %}</span>{% else %}<span class="badge">{% translate "Away" %}</span>{% endif %}</td>
+              <td>{% if p.is_online and session.is_open %}<span class="badge badge--live">{% translate "Yes" %}</span>{% else %}<span class="badge">{% translate "Away" %}</span>{% endif %}</td>
             </tr>
             {% endwith %}
           {% endfor %}
         </tbody>
       </table>
     </div>
-    <p class="muted">{% translate "Updates every 5 seconds. Click a name to see that student's history." %}</p>
+    <p class="muted">{% translate "This list updates by itself. Click a name to see more about that student." %}</p>
   {% else %}
     <p class="muted">{% translate "Waiting for students. Show them the room code." %}</p>
   {% endif %}

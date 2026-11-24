@@ -2,10 +2,10 @@
 {% load i18n %}
 {% block title %}{{ video.title }}{% endblock %}
 {% block content %}
-<p><a href="{% url 'library:home' %}">← {% translate "Library" %}</a></p>
+<p><a href="{% url 'library:home' %}">← {% translate "My materials" %}</a></p>
 <div class="card stack">
   <h1>{{ video.title }}</h1>
-  <p class="muted">{{ video.game_type.name }}{% if video.is_default %} · {% translate "Default" %}{% endif %}</p>
+  <p class="muted">{{ video.game_type.name }}{% if video.is_default %} · {% translate "Ready-made" %}{% endif %}</p>
   {% if video.url %}
     <video class="tutorial__video" controls preload="metadata">
       <source src="{{ video.url }}" type="{{ video.mime_type }}">

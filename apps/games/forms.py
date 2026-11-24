@@ -37,6 +37,7 @@ class QuestionSetForm(forms.ModelForm):
     class Meta:
         model = QuestionSet
         fields = ["title"]
+        labels = {"title": _("Name")}
 
 
 class QuestionForm(forms.ModelForm):
@@ -88,13 +89,13 @@ class ClassroomGameConfigForm(forms.ModelForm):
         fields = ["question_sets", "video"]
         widgets = {"question_sets": forms.CheckboxSelectMultiple}
         labels = {
-            "question_sets": _("My question sets to use in this class"),
-            "video": _("Tutorial video"),
+            "question_sets": _("Use my questions in this class"),
+            "video": _("How-to video"),
         }
         help_texts = {
             "question_sets": _(
-                "When a student picks a level and kind that matches one of these sets, "
-                "it's used. Anything else uses the default questions."
+                "If a student picks the same level and type, your questions are used. "
+                "Otherwise they get the ready-made ones."
             ),
         }
 
@@ -111,5 +112,5 @@ class ClassroomGameConfigForm(forms.ModelForm):
         self.fields["video"].queryset = Video.objects.filter(
             Q(owner__isnull=True) | Q(owner=teacher), game_type=game_type
         )
-        self.fields["video"].empty_label = _("Default video")
+        self.fields["video"].empty_label = _("Ready-made video")
         self.fields["video"].required = False

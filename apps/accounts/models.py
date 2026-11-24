@@ -13,7 +13,7 @@ from apps.core.models import TimeStampedModel
 # usernames lets one login box tell the two apart.
 username_validator = RegexValidator(
     r"^[a-zA-Z0-9._-]+$",
-    _("Use only letters, numbers, dots, dashes and underscores."),
+    _("Use letters and numbers only, with no spaces."),
 )
 
 

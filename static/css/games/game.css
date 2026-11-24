@@ -24,5 +24,12 @@
 
 /* Result */
 .result__burst { font-size: 4rem; line-height: 1; color: var(--color-accent-strong); margin: 0; animation: result-pop 600ms ease-out; }
-.result__score { font-size: var(--font-size-xxl); font-weight: 700; color: var(--color-primary); margin: 0; }
+.result__score { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-primary); margin: 0; }
+.result__stars { font-size: 3.5rem; line-height: 1; margin: 0; letter-spacing: 0.1em; }
+.result__star { color: var(--color-accent-strong); display: inline-block; animation: result-pop 500ms ease-out both; }
+.result__star:nth-child(2) { animation-delay: 100ms; }
+.result__star:nth-child(3) { animation-delay: 200ms; }
+.result__star:nth-child(4) { animation-delay: 300ms; }
+.result__star:nth-child(5) { animation-delay: 400ms; }
+.result__star--empty { color: var(--color-border); }
 @keyframes result-pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }

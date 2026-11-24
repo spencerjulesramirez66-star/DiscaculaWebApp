@@ -22,7 +22,7 @@
       <input type="hidden" name="next" value="{{ next }}">
       {% for layer in layers %}
         <fieldset class="avatar-pick">
-          <legend>{{ layer.key|capfirst }}</legend>
+          <legend>{{ layer.label|default:layer.key|capfirst }}</legend>
           <div class="avatar-pick__options">
             {% if layer.optional %}
               <label class="avatar-pick__option">

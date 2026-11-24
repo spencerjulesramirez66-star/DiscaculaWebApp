@@ -179,7 +179,10 @@ def test_full_round_through_http(student_client, participant):
     assert data["done"] is True and data["score"] == 100
 
     result = student_client.get(reverse("games:result", args=[round_.pk]))
-    assert "Congratulations" in result.content.decode() and "100%" in result.content.decode()
+    assert (
+        "Congratulations" in result.content.decode()
+        and "5 out of 5 right the first time" in result.content.decode()
+    )
     # A finished round can't be replayed; its page forwards to the result.
     assert student_client.get(reverse("games:round", args=[round_.pk])).url.endswith("/result/")
 

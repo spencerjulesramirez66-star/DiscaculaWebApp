@@ -18,7 +18,9 @@ def video_upload(request):
         video = form.save(commit=False)
         video.owner = request.user
         video.save()
-        messages.success(request, _("Video uploaded. Choose it in a class's game settings."))
+        messages.success(
+            request, _("Video uploaded. To use it, open a class and choose it under Games.")
+        )
         return redirect("library:home")
     return render(request, "content/video_upload.html", {"form": form})
 

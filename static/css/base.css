@@ -258,6 +258,3 @@ a.choice-card:hover { transform: translateY(-2px); border-color: var(--color-pri
 .a11y-settings__form .field--checkbox { flex-wrap: wrap; }
 .a11y-settings__form .field--checkbox .field__help { flex-basis: 100%; margin-left: calc(24px + var(--space-2)); }
 
-/* Where students type the room code (SITE_URL) */
-.room-code__where { margin: var(--space-2) 0 0; font-size: var(--font-size-lg); word-break: break-all; }
-.login-card__where { margin: var(--space-3) 0 0; font-size: var(--font-size-sm); color: var(--color-text-muted); word-break: break-all; }
