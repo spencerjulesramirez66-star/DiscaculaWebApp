@@ -3,7 +3,7 @@ from django.contrib.auth import password_validation
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.translation import gettext_lazy as _
 
-from .models import Role, User, username_validator
+from .models import Role, StudentProfile, User, username_validator
 
 
 class LoginForm(AuthenticationForm):
@@ -116,3 +116,34 @@ class ForgotPasswordForm(forms.Form):
 
 class ResetPasswordForm(_PasswordPairMixin, OTPForm):
     field_order = ["code", "password1", "password2"]
+
+
+class AccessibilityForm(forms.ModelForm):
+    """A11Y-01: set by the teacher on the student's history page (docs/06-accessibility.md)."""
+
+    class Meta:
+        model = StudentProfile
+        fields = [
+            "high_contrast",
+            "large_text",
+            "reduced_motion",
+            "captions",
+            "narration",
+            "keyboard_mode",
+        ]
+        labels = {
+            "high_contrast": _("High contrast"),
+            "large_text": _("Large text and buttons"),
+            "reduced_motion": _("Reduce motion"),
+            "captions": _("Captions on videos"),
+            "narration": _("Read questions aloud (early version)"),
+            "keyboard_mode": _("Keyboard play hints"),
+        }
+        help_texts = {
+            "high_contrast": _("White and yellow on black. For low vision."),
+            "large_text": _("Bigger letters, numbers and tap targets."),
+            "reduced_motion": _("Turns off animations, the loading screen and video autoplay."),
+            "captions": _("Turns captions on by default. For deaf or hard-of-hearing students."),
+            "narration": _("Uses the device's built-in voice. Quality depends on the device."),
+            "keyboard_mode": _("Strong focus outline and tips for playing with Tab and Enter."),
+        }

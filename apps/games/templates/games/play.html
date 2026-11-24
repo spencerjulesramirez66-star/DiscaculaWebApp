@@ -15,6 +15,7 @@
     <span class="muted">{{ round.game_type.name }} · {{ round.get_difficulty_display }}</span>
     <span class="game-progress" data-game-progress aria-live="polite"></span>
   </div>
+  <p class="keyboard-hint banner">{% translate "Keyboard: press Tab to reach a fruit and Enter to move it. Then Tab to the buttons and press Enter." %}</p>
   {# The game module mounts here. Without JS the message below stays visible. #}
   <div id="game-root" class="game-root" data-game="{{ round.game_type.key }}">
     <noscript><p>{% translate "This game needs JavaScript turned on." %}</p></noscript>

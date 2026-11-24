@@ -60,7 +60,6 @@ def game_tutorial(request, session_pk, key):
             "session": participant.session,
             "video": video if content_services.video_is_playable(video) else None,
             "first_time": first_time,
-            "a11y": getattr(request.user, "student_profile", None),
         },
     )
 

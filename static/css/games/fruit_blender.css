@@ -38,7 +38,7 @@
 .fb__choices { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: center; }
 .fb__choice { min-width: 6rem; font-size: var(--font-size-xl); }
 .fb__choice.is-wrong { border-color: var(--color-danger); color: var(--color-danger); text-decoration: line-through; }
-.fb__choice.is-right { border-color: var(--color-success); background: var(--color-success); color: #fff; }
+.fb__choice.is-right { border-color: var(--color-success); background: var(--color-success); color: var(--color-on-success); }
 .fb__feedback { text-align: center; font-size: var(--font-size-lg); font-weight: 700; min-height: 1.6em; margin: 0; }
 
 @media (max-width: 40rem) {

@@ -8,7 +8,8 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.accounts.decorators import teacher_required
-from apps.accounts.models import User
+from apps.accounts.forms import AccessibilityForm
+from apps.accounts.models import StudentProfile, User
 from apps.games import monitoring
 from apps.games.models import GameType
 
@@ -219,6 +220,18 @@ def student_detail(request, pk, student_pk):
         student_id=student_pk,
     )
     student = enrollment.student
+    profile, _created = StudentProfile.objects.get_or_create(user=student)
+    # Bind on any POST: with every box unticked the POST can be empty (and `or None` would skip it).
+    a11y_form = AccessibilityForm(
+        request.POST if request.method == "POST" else None, instance=profile
+    )
+    if request.method == "POST" and a11y_form.is_valid():
+        # A11Y-01: applies on the student's next page load (body classes + game config).
+        a11y_form.save()
+        messages.success(
+            request, _("Accessibility settings saved for %(name)s.") % {"name": student}
+        )
+        return redirect("teach:student_detail", pk=classroom.pk, student_pk=student.pk)
     rounds = monitoring.student_rounds(student, request.user)
     details = monitoring.round_details(rounds[:HISTORY_ROUNDS])
     return render(
@@ -228,6 +241,7 @@ def student_detail(request, pk, student_pk):
             "classroom": classroom,
             "student": student,
             "enrollment": enrollment,
+            "a11y_form": a11y_form,
             "summary": monitoring.history_summary(rounds, details),
             "details": details,
             "shown": len(details),

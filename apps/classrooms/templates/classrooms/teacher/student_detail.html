@@ -13,6 +13,30 @@
   </div>
 </div>
 
+<details class="card a11y-settings" {% if a11y_form.errors %}open{% endif %}>
+  <summary>
+    <h2>{% translate "Accessibility" %}</h2>
+    <span class="muted">
+      {% with p=a11y_form.instance %}
+        {% if p.high_contrast or p.large_text or p.reduced_motion or p.captions or p.narration or p.keyboard_mode %}
+          {% if p.high_contrast %}<span class="badge">{% translate "High contrast" %}</span>{% endif %}
+          {% if p.large_text %}<span class="badge">{% translate "Large text" %}</span>{% endif %}
+          {% if p.reduced_motion %}<span class="badge">{% translate "Less motion" %}</span>{% endif %}
+          {% if p.captions %}<span class="badge">{% translate "Captions" %}</span>{% endif %}
+          {% if p.narration %}<span class="badge">{% translate "Read aloud" %}</span>{% endif %}
+          {% if p.keyboard_mode %}<span class="badge">{% translate "Keyboard" %}</span>{% endif %}
+        {% else %}{% translate "Standard settings. Open to change." %}{% endif %}
+      {% endwith %}
+    </span>
+  </summary>
+  <form method="post" class="a11y-settings__form">
+    {% csrf_token %}
+    <p class="muted">{% translate "Applied the next time this student opens a page, on any device they log in to." %}</p>
+    {% translate "Save accessibility settings" as submit_label %}
+    {% include "components/form.html" with form=a11y_form submit_label=submit_label %}
+  </form>
+</details>
+
 <section class="stat-grid" aria-label="{% translate 'Summary' %}">
   <div class="stat card"><span class="stat__value">{{ summary.rounds_played }}</span><span class="stat__label">{% translate "Rounds played" %}</span></div>
   <div class="stat card"><span class="stat__value">{{ summary.rounds_finished }}</span><span class="stat__label">{% translate "Rounds finished" %}</span></div>

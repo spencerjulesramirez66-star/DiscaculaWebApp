@@ -9,10 +9,15 @@
   --color-primary: #2f6fde;
   --color-primary-text: #ffffff;
   --color-accent: #f59e0b;
+  --color-accent-strong: #b45309; /* accent for small shapes/text: 4.5:1+ on the page background */
   --color-success: #15803d;
   --color-danger: #b91c1c;
   --color-border: #d9d4c7;
   --color-focus: #f59e0b;
+  --color-on-success: #ffffff;
+  --color-success-bg: #e9f7ee;
+  --color-danger-bg: #fdecec;
+  --color-warning-bg: #fff6e0;
 
   /* Type */
   --font-family: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;

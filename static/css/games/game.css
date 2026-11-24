@@ -23,6 +23,6 @@
 .game-category__hint { font-size: var(--font-size-base); font-weight: 400; }
 
 /* Result */
-.result__burst { font-size: 4rem; line-height: 1; color: var(--color-accent); margin: 0; animation: result-pop 600ms ease-out; }
+.result__burst { font-size: 4rem; line-height: 1; color: var(--color-accent-strong); margin: 0; animation: result-pop 600ms ease-out; }
 .result__score { font-size: var(--font-size-xxl); font-weight: 700; color: var(--color-primary); margin: 0; }
 @keyframes result-pop { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
